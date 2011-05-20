@@ -9,35 +9,37 @@ Sonatype.Events.addListener('fileContainerUpdate', function(artifactContainer,
 		data) {
 	var panel = artifactContainer.find('name', 'reverseDependencyPanel')[0];
 	if (data == null || !data.leaf) {
-//		panel.showArtifact(null, artifactContainer);
+		// panel.showArtifact(null, artifactContainer);
 	} else {
-//		panel.showArtifact(data, artifactContainer);
+		panel.showDependees(data, artifactContainer);
 	}
 });
 
-// Sonatype.Events.addListener('artifactContainerInit', function(items) {
-// items.push(new Sonatype.repoServer.ReverseDependencyPanel({
-// name : 'reverseDependencyPanel',
-// tabTitle : 'Reverse Dependencies',
-// preferredIndex : 20
-// }));
-// });
-// Sonatype.Events.addListener('artifactContainerUpdate', function(
-// artifactContainer, payload) {
-// var panel = artifactContainer.find('name', 'reverseDependencyPanel')[0];
-// if (payload == null || !payload.leaf) {
-// panel.showArtifact(null, artifactContainer);
-// } else {
-// panel.showArtifact(payload, artifactContainer);
-// }
-// });
+Sonatype.Events.addListener('artifactContainerInit', function(items) {
+	items.push(new Sonatype.repoServer.ReverseDependencyPanel({
+		name : 'reverseDependencyPanel',
+		tabTitle : 'Reverse Dependencies',
+		preferredIndex : 20
+	}));
+});
+Sonatype.Events.addListener('artifactContainerUpdate', function(
+		artifactContainer, payload) {
+	var panel = artifactContainer.find('name', 'reverseDependencyPanel')[0];
+	if (payload == null || !payload.leaf) {
+		// panel.showArtifact(null, artifactContainer);
+	} else {
+		panel.showDependees(payload, artifactContainer);
+	}
+});
 
 Sonatype.repoServer.ReverseDependencyPanel = function(config) {
 	var config = config || {};
 	var defaultConfig = {};
 	Ext.apply(this, config, defaultConfig);
-	this.sp = Sonatype.lib.Permissions;
-
+	
+	this.oldSearchText = '';
+	this.searchTask = new Ext.util.DelayedTask( this.startSearch, this, [this]);
+	
 	Sonatype.repoServer.ReverseDependencyPanel.superclass.constructor
 			.call(
 					this,
@@ -60,32 +62,35 @@ Sonatype.repoServer.ReverseDependencyPanel = function(config) {
 									scope : this,
 									handler : this.refreshHandler
 								},
-								' ',
-								'Path Lookup:',
-								{
-									xtype : 'nexussearchfield',
-									searchPanel : this,
-									width : 400,
-									enableKeyEvents : true,
-									listeners : {
-										'keyup' : {
-											fn : function(field, event) {
-												var key = event.getKey();
-												if (!event.isNavKeyPress()) {
-													this.searchTask.delay(200);
-												}
-											},
-											scope : this
-										},
-										'render' : function(c) {
-											Ext.QuickTips
-													.register({
-														target : c.getEl(),
-														text : 'Enter a complete path to lookup, for example org/sonatype/nexus'
-													});
-										}
-									}
-								} ],
+								' '
+// Commenting this out 'cause it doesn't quite work the way it ought to.  Not
+// sure that it even makes sense if the full tree isn't populated.
+//								, 'Path Lookup:',
+//								{
+//									xtype : 'nexussearchfield',
+//									searchPanel : this,
+//									width : 400,
+//									enableKeyEvents : true,
+//									listeners : {
+//										'keyup' : {
+//											fn : function(field, event) {
+//												var key = event.getKey();
+//												if (!event.isNavKeyPress()) {
+//													this.searchTask.delay(200);
+//												}
+//											},
+//											scope : this
+//										},
+//										'render' : function(c) {
+//											Ext.QuickTips
+//													.register({
+//														target : c.getEl(),
+//														text : 'Enter a complete path to lookup, for example org/sonatype/nexus'
+//													});
+//										}
+//									}
+//								}
+								],
 						loader : new Ext.tree.SonatypeTreeLoader({
 							url : '',
 							listeners : {
@@ -107,8 +112,8 @@ Sonatype.repoServer.ReverseDependencyPanel = function(config) {
 	});
 
 	var root = new Ext.tree.AsyncTreeNode({
-		text : "root:artifactId",
-		id : "rootNodeId",
+		text : "error",
+		id : "error-node",
 		singleClickExpand : true,
 		expanded : false
 	});
@@ -121,56 +126,21 @@ Ext
 				Sonatype.repoServer.ReverseDependencyPanel,
 				Ext.tree.TreePanel,
 				{
+					showDependees : function(payload, artifactContainer) {
+						this.payload = payload;
 
-					getBrowsePath : function(baseUrl, remoteUrl, id) {
-						var modUrl = baseUrl + "/remotebrowser/";
-						return modUrl;
-					},
-
-					getBrowsePathSnippet : function() {
-						return this.browseIndex ? Sonatype.config.browseIndexPathSnippet
-								: Sonatype.config.browsePathSnippet;
+						this.root.setText(payload.text);
+						this.root.attributes.localStorageUpdated = false;
+						this.root.id = payload.resourceURI.replace("/content/",
+								"/dependees/");
+						this.root.attributes.expanded = false;
 					},
 
 					indexBrowserExpandFollowup : function(node) {
-						if (this.browseIndex
-								&& !node.attributes.localStorageUpdated
-								&& node.firstChild) {
-							node.attributes.localStorageUpdated = true;
-							Ext.Ajax
-									.request({
-										url : node.id
-												.replace(
-														Sonatype.config.browseIndexPathSnippet,
-														Sonatype.config.browsePathSnippet)
-												+ '?isLocal',
-										suppressStatus : 404,
-										success : function(response, options) {
-											var decodedResponse = Ext
-													.decode(response.responseText);
-											if (decodedResponse.data) {
-												var data = decodedResponse.data;
-												for ( var j = 0; j < node.childNodes.length; j++) {
-													var indexNode = node.childNodes[j];
-													indexNode.attributes.localStorageUpdated = true;
-													for ( var i = 0; i < data.length; i++) {
-														var contentNode = data[i];
-														if (contentNode.text == indexNode.text) {
-															indexNode.ui.iconNode.className = 'x-tree-node-nexus-icon';
-															indexNode.attributes.localStorageUpdated = false;
-															break;
-														}
-													}
-												}
-											}
-										},
-										failure : function(response, options) {
-											for ( var j = 0; j < node.childNodes.length; j++) {
-												node.childNodes[j].attributes.localStorageUpdated = true;
-											}
-										},
-										scope : this
-									});
+						var urlBase = "/nexus/service/local/repo_groups/public/dependees/";
+						for ( var j = 0; j < node.childNodes.length; j++) {
+							var childNode = node.childNodes[j];
+							childNode.id = urlBase+childNode.text;
 						}
 					},
 
@@ -185,12 +155,16 @@ Ext
 					},
 
 					nodeContextMenuHandler : function(node, e) {
+						// TODO: Put context menu logic here. Not sure what we
+						// actually
+						// need here, though. Maybe an option to go to the
+						// artifact details?
 						if (e.target.nodeName == 'A')
 							return; // no menu on links
 
 						if (this.nodeContextMenuEvent) {
 
-							node.attributes.repoRecord = null; //this.payload;
+							node.attributes.repoRecord = null; // this.payload;
 							node.data = node.attributes;
 
 							var menu = new Sonatype.menu.Menu({
@@ -200,18 +174,18 @@ Ext
 								items : []
 							});
 
-//							Sonatype.Events.fireEvent(
-//									this.nodeContextMenuEvent, menu,
-//									, node);
+							// Sonatype.Events.fireEvent(
+							// this.nodeContextMenuEvent, menu,
+							// , node);
 
 							var item;
 							while ((item = menu.items.first()) && !item.text) {
 								menu.remove(item); // clean up if the first
-													// element is a separator
+								// element is a separator
 							}
 							while ((item = menu.items.last()) && !item.text) {
 								menu.remove(item); // clean up if the last
-													// element is a separator
+								// element is a separator
 							}
 							if (!menu.items.first())
 								return;
@@ -222,10 +196,11 @@ Ext
 					},
 
 					refreshHandler : function(button, e) {
-						this.root.setText(this.payload ? this.payload
-								.get(this.titleColumn) : '/');
+						this.root.setText(this.payload.text);
 						this.root.attributes.localStorageUpdated = false;
-						this.root.id = "rootNodeId";
+						this.root.attributes.expanded = false;
+						this.root.id = this.payload.resourceURI.replace(
+								"/content/", "/dependees/");
 						this.root.reload();
 					},
 
@@ -356,3 +331,4 @@ Ext
 					}
 
 				});
+
