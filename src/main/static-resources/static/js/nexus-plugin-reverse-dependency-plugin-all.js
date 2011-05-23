@@ -11,7 +11,7 @@ Sonatype.Events.addListener('fileContainerUpdate', function(artifactContainer,
 	if (data == null || !data.leaf) {
 		// panel.showArtifact(null, artifactContainer);
 	} else {
-		panel.showDependees(data, artifactContainer);
+		panel.showDependeesForResource(data, artifactContainer);
 	}
 });
 
@@ -28,7 +28,7 @@ Sonatype.Events.addListener('artifactContainerUpdate', function(
 	if (payload == null || !payload.leaf) {
 		// panel.showArtifact(null, artifactContainer);
 	} else {
-		panel.showDependees(payload, artifactContainer);
+		panel.showDependeesForResource(payload, artifactContainer);
 	}
 });
 
@@ -126,18 +126,44 @@ Ext
 				Sonatype.repoServer.ReverseDependencyPanel,
 				Ext.tree.TreePanel,
 				{
-					showDependees : function(payload, artifactContainer) {
-						this.payload = payload;
-
-						this.root.setText(payload.text);
+					showDependeesForResource : function(payload, artifactContainer) {
+				          Ext.Ajax.request({
+				                url : payload.resourceURI + '?describe=maven2&isLocal=true',
+				                callback : function(options, isSuccess, response) {
+				                  if (isSuccess)
+				                  {
+				                    var infoResp = Ext.decode(response.responseText);
+				                    this.showDependees(infoResp.data);
+				                  }
+				                  else
+				                  {
+				                    if (response.status = 404)
+				                    {
+				                      artifactContainer.hideTab(this);
+				                    }
+				                    else
+				                    {
+				                      Sonatype.utils.connectionError(response, 'Unable to retrieve Maven information.');
+				                    }
+				                  }
+				                },
+				                scope : this,
+				                method : 'GET',
+				                suppressStatus : '404'
+				              });
+					},
+					
+					showDependees : function(rootArtifact) {
+						this.rootArtifact = rootArtifact;
+						var gav = rootArtifact.groupId+":"+rootArtifact.artifactId+":"+rootArtifact.baseVersion;
+						this.root.setText(gav);
 						this.root.attributes.localStorageUpdated = false;
-						this.root.id = payload.resourceURI.replace("/content/",
-								"/dependees/");
 						this.root.attributes.expanded = false;
+						this.root.id = "/nexus/service/local/dependees/"+this.root.text;
 					},
 
 					indexBrowserExpandFollowup : function(node) {
-						var urlBase = "/nexus/service/local/repo_groups/public/dependees/";
+						var urlBase = "/nexus/service/local/dependees/";
 						for ( var j = 0; j < node.childNodes.length; j++) {
 							var childNode = node.childNodes[j];
 							childNode.id = urlBase+childNode.text;
@@ -196,11 +222,7 @@ Ext
 					},
 
 					refreshHandler : function(button, e) {
-						this.root.setText(this.payload.text);
-						this.root.attributes.localStorageUpdated = false;
-						this.root.attributes.expanded = false;
-						this.root.id = this.payload.resourceURI.replace(
-								"/content/", "/dependees/");
+						this.showDependees(this.rootArtifact);
 						this.root.reload();
 					},
 
