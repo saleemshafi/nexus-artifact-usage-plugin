@@ -1,18 +1,17 @@
 package com.paypal.nexus.reversedep.store;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Collections;
 
-public class InMemoryReverseDependencyStore implements ReverseDependencyStore {
+import org.codehaus.plexus.component.annotations.Component;
+import org.codehaus.plexus.logging.AbstractLogEnabled;
+
+@Component( role = ReverseDependencyStore.class, hint = "InMemory" )
+public class InMemoryReverseDependencyStore extends AbstractLogEnabled implements ReverseDependencyStore {
 	private Map<Artifact, Collection<Artifact>> dependeeMap = new HashMap<Artifact, Collection<Artifact>>();
-
-	// yes, i know, this is bad, but until i figure out how Plexus works, this will do.
-	private static InMemoryReverseDependencyStore instance = new InMemoryReverseDependencyStore();
-	private InMemoryReverseDependencyStore() {}
-	public static InMemoryReverseDependencyStore getInstance() { return instance; }
 	
 	public Collection<Artifact> getDependees(Artifact dependency) {
 		Collection<Artifact> dependees = dependeeMap.get(dependency);

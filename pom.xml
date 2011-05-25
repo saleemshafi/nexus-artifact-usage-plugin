@@ -13,7 +13,7 @@
 
 	<properties>
 		<!-- Set the Nexus version here, against which you build the plugin -->
-		<nexus-version>1.4.1</nexus-version>
+		<nexus-version>1.9.1</nexus-version>
 	    <aetherVersion>1.11</aetherVersion>
 	    <mavenVersion>3.0.2</mavenVersion>
 	    <wagonVersion>1.0-beta-7</wagonVersion>
@@ -189,7 +189,7 @@
 			<!-- #ITSet BEGINS -->
 			<!-- Nexus IT setup (dependencies below are needed if you have extensive 
 				ITs and you want to use Nexus Environment) -->
-			<!-- There are dependencies connected to this set of plugin, see above! -->
+			<!-- There are dependencies connected to this set of plugin, see above!
 			<plugin>
 				<groupId>org.sonatype.plugins</groupId>
 				<artifactId>nexus-test-environment-maven-plugin</artifactId>
@@ -219,7 +219,7 @@
 					</execution>
 				</executions>
 			</plugin>
-			<!-- #ITSet ENDS -->
+			 #ITSet ENDS -->
 
 		      <plugin>
 		        <artifactId>maven-antrun-plugin</artifactId>

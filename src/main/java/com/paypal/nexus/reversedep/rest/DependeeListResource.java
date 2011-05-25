@@ -6,6 +6,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.Produces;
 
 import org.codehaus.plexus.component.annotations.Component;
+import org.codehaus.plexus.component.annotations.Requirement;
 import org.restlet.Context;
 import org.restlet.data.Request;
 import org.restlet.data.Response;
@@ -16,7 +17,6 @@ import org.sonatype.plexus.rest.resource.PathProtectionDescriptor;
 import org.sonatype.plexus.rest.resource.PlexusResource;
 
 import com.paypal.nexus.reversedep.store.Artifact;
-import com.paypal.nexus.reversedep.store.InMemoryReverseDependencyStore;
 import com.paypal.nexus.reversedep.store.ReverseDependencyStore;
 
 @Produces( { "application/xml", "application/json" } )
@@ -25,7 +25,8 @@ import com.paypal.nexus.reversedep.store.ReverseDependencyStore;
 public class DependeeListResource
     extends AbstractNexusPlexusResource
 {
-	private ReverseDependencyStore dependeeStore = InMemoryReverseDependencyStore.getInstance();
+	@Requirement(hint = "InMemory")
+	private ReverseDependencyStore dependeeStore;
 	
     @Override
 	public String getResourceUri() {
@@ -36,7 +37,8 @@ public class DependeeListResource
     public Object get( Context context, Request request, Response response, Variant variant )
         throws ResourceException
     {
-    	getLogger().info("getting dependees for "+request.getResourceRef().getLastSegment());
+// TODO: Figure out why this is creating NPE
+//    	getLogger().info("getting dependees for "+request.getResourceRef().getLastSegment());
         DependeeListResourceResponse res = new DependeeListResourceResponse();
         
         Collection<Artifact> dependees = dependeeStore.getDependees(new Artifact(request.getResourceRef().getLastSegment()));

@@ -20,7 +20,7 @@ public class TestMavenProjectParsing {
 	public void testMavenProjectDependencies() throws Exception {
 		// convert to a Maven project
 		InputStream input = new FileInputStream("pom.xml");
-		MavenProject project = ReverseDependencyEventInspector.getMavenProject(input);
+		MavenProject project = null;//ReverseDependencyEventInspector.getMavenProject(input);
 		Assert.assertNotNull(project);
 		ArtifactFactory factory = new DefaultArtifactFactory();
 		ArtifactHandlerManager handlerMgr = new DefaultArtifactHandlerManager();
