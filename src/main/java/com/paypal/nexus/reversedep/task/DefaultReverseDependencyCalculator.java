@@ -124,6 +124,9 @@ public class DefaultReverseDependencyCalculator extends AbstractLogEnabled
 		// getLogger().info("Calculating reverse dependencies for "
 		// + item.getRepositoryItemUid().getPath());
 
+		// TODO: probably ought to have some way of skipping the files that
+		// haven't changed since the last time we did this					
+		
 		// convert to a Maven project
 		InputStream input = item.getContentLocator().getContent();
 		MavenProject project = getMavenProject(input);
