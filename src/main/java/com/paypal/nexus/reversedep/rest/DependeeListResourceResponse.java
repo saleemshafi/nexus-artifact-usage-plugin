@@ -12,7 +12,7 @@ import org.sonatype.nexus.rest.model.NexusResponse;
 
 import com.paypal.nexus.reversedep.store.Artifact;
 
-@XmlRootElement(name="dependeeresponse")
+@XmlRootElement(name = "dependeeresponse")
 public class DependeeListResourceResponse extends NexusResponse implements
 		Serializable {
 
@@ -20,12 +20,12 @@ public class DependeeListResourceResponse extends NexusResponse implements
 
 	private List<Artifact> data = new ArrayList<Artifact>();
 
-	@XmlElementWrapper( name = "data" )
-    @XmlElement( name = "node" )
-    public List<Artifact> getData() {
+	@XmlElementWrapper(name = "data")
+	@XmlElement(name = "node")
+	public List<Artifact> getData() {
 		return data;
 	}
-	
+
 	public void addDependee(Artifact dependee) {
 		this.data.add(dependee);
 	}

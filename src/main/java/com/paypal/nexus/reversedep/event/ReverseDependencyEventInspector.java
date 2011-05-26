@@ -24,14 +24,22 @@ import org.sonatype.nexus.proxy.item.StorageItem;
 import org.sonatype.nexus.proxy.repository.HostedRepository;
 import org.sonatype.plexus.appevents.Event;
 
-import com.paypal.nexus.task.ReverseDependencyCalculator;
+import com.paypal.nexus.reversedep.task.ReverseDependencyCalculator;
 
+/**
+ * Event handler that updates the reverse dependency mappings whenever an
+ * artifact is added or deleted from the repository.
+ * 
+ * @author Saleem Shafi
+ * 
+ */
 @Component(role = EventInspector.class, hint = "ReverseDependencyEventInspector")
 public class ReverseDependencyEventInspector extends AbstractEventInspector {
 
 	@Requirement
 	private ReverseDependencyCalculator calculator;
-	
+
+	// Only handle cases where a repository is added, updated or deleted
 	public boolean accepts(Event<?> evt) {
 		return evt instanceof RepositoryItemEventStore
 				|| evt instanceof RepositoryItemEventDelete;
@@ -39,43 +47,40 @@ public class ReverseDependencyEventInspector extends AbstractEventInspector {
 
 	public void inspect(Event<?> evt) {
 		try {
+			// add or update
 			if (evt instanceof RepositoryItemEventStore) {
 				onItemStore((RepositoryItemEventStore) evt);
-			} else {
+				// delete
+			} else if (evt instanceof RepositoryItemEventDelete) {
 				onItemDelete((RepositoryItemEventDelete) evt);
 			}
+			// just log the errors
 		} catch (IOException e) {
-			e.printStackTrace();
+			getLogger().error(
+					"Error processing reverse dependencies during event", e);
 		} catch (ComponentLookupException e) {
-			e.printStackTrace();
+			getLogger().error(
+					"Error processing reverse dependencies during event", e);
 		} catch (PlexusContainerException e) {
-			e.printStackTrace();
+			getLogger().error(
+					"Error processing reverse dependencies during event", e);
 		}
 	}
 
 	private void onItemDelete(RepositoryItemEventDelete evt) throws IOException {
-		// we only care about artifacts added to hosted repos
-		if (evt.getRepository().getRepositoryKind()
-				.isFacetAvailable(HostedRepository.class)) {
-			// we only care about POM files
-			StorageItem item = evt.getItem();
-			if (item instanceof StorageFileItem
-					&& item.getPath().endsWith(".pom")) {
-				calculator.removeReverseDependencies((StorageFileItem)item);
-			}
+		// we only care about POM files
+		StorageItem item = evt.getItem();
+		if (item instanceof StorageFileItem && item.getPath().endsWith(".pom")) {
+			calculator.removeReverseDependencies((StorageFileItem) item);
 		}
 	}
 
-	private void onItemStore(RepositoryItemEventStore evt) throws IOException, ComponentLookupException, PlexusContainerException {
-		// we only care about artifacts added to hosted repos
-		if (evt.getRepository().getRepositoryKind()
-				.isFacetAvailable(HostedRepository.class)) {
-			// we only care about POM files
-			StorageItem item = evt.getItem();
-			if (item instanceof StorageFileItem
-					&& item.getPath().endsWith(".pom")) {
-				calculator.calculateReverseDependencies((StorageFileItem)item);
-			}
+	private void onItemStore(RepositoryItemEventStore evt) throws IOException,
+			ComponentLookupException, PlexusContainerException {
+		// we only care about POM files
+		StorageItem item = evt.getItem();
+		if (item instanceof StorageFileItem && item.getPath().endsWith(".pom")) {
+			calculator.calculateReverseDependencies((StorageFileItem) item);
 		}
 	}
 }

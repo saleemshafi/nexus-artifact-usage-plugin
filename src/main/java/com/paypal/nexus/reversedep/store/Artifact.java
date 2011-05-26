@@ -8,19 +8,20 @@ public class Artifact {
 	private String artifactId;
 	private String version;
 	private String text;
-	
+
 	public Artifact(String groupId, String artifactId, String version) {
 		this.groupId = groupId;
 		this.artifactId = artifactId;
 		this.version = version;
-		
-		this.text = groupId+":"+artifactId+":"+version;
+
+		this.text = groupId + ":" + artifactId + ":" + version;
 	}
-	
+
 	public Artifact(String gav) {
 		String[] gavPieces = gav.split(":");
 		if (gavPieces.length != 3) {
-			throw new IllegalArgumentException("GAV parameter must be in the form <groupId>:<artifactId>:version");
+			throw new IllegalArgumentException(
+					"GAV parameter must be in the form <groupId>:<artifactId>:version");
 		}
 		this.groupId = gavPieces[0];
 		this.artifactId = gavPieces[1];
@@ -38,9 +39,9 @@ public class Artifact {
 	public String getVersion() {
 		return version;
 	}
-	
+
 	public String toString() {
-		return this.groupId+":"+this.artifactId+":"+this.version;
+		return this.text;
 	}
 
 	@Override
@@ -80,6 +81,5 @@ public class Artifact {
 			return false;
 		return true;
 	}
-	
-	
+
 }

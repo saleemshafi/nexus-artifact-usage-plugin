@@ -19,44 +19,42 @@ import org.sonatype.plexus.rest.resource.PlexusResource;
 import com.paypal.nexus.reversedep.store.Artifact;
 import com.paypal.nexus.reversedep.store.ReverseDependencyStore;
 
-@Produces( { "application/xml", "application/json" } )
-@Consumes( { "application/xml", "application/json" } )
-@Component( role = PlexusResource.class, hint = "com.paypal.nexus.ReverseDependencyResource" )
-public class DependeeListResource
-    extends AbstractNexusPlexusResource
-{
+@Produces({ "application/xml", "application/json" })
+@Consumes({ "application/xml", "application/json" })
+@Component(role = PlexusResource.class, hint = "com.paypal.nexus.ReverseDependencyResource")
+public class DependeeListResource extends AbstractNexusPlexusResource {
 	@Requirement(hint = "InMemory")
 	private ReverseDependencyStore dependeeStore;
-	
-    @Override
+
+	@Override
 	public String getResourceUri() {
-        return "/dependees";
+		return "/dependees";
 	}
 
-    @Override
-    public Object get( Context context, Request request, Response response, Variant variant )
-        throws ResourceException
-    {
-// TODO: Figure out why this is creating NPE
-//    	getLogger().info("getting dependees for "+request.getResourceRef().getLastSegment());
-        DependeeListResourceResponse res = new DependeeListResourceResponse();
-        
-        Collection<Artifact> dependees = dependeeStore.getDependees(new Artifact(request.getResourceRef().getLastSegment()));
-        for (Artifact dependee : dependees) {
-		    res.addDependee( dependee );
-        }
-        return res;
-    }
+	@Override
+	public Object get(Context context, Request request, Response response,
+			Variant variant) throws ResourceException {
+		// TODO: Figure out why this is creating NPE
+		// getLogger().info("getting dependees for "+request.getResourceRef().getLastSegment());
+		DependeeListResourceResponse res = new DependeeListResourceResponse();
+
+		Collection<Artifact> dependees = dependeeStore
+				.getDependees(new Artifact(request.getResourceRef()
+						.getLastSegment()));
+		for (Artifact dependee : dependees) {
+			res.addDependee(dependee);
+		}
+		return res;
+	}
 
 	@Override
 	public PathProtectionDescriptor getResourceProtection() {
-        return new PathProtectionDescriptor( "/dependees", "authcBasic,tgperms" );
+		return new PathProtectionDescriptor("/dependees", "authcBasic,tgperms");
 	}
 
 	@Override
 	public Object getPayloadInstance() {
-		// TODO Auto-generated method stub
 		return null;
 	}
-    
+
 }
