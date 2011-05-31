@@ -160,6 +160,7 @@ Ext
 						this.root.attributes.localStorageUpdated = false;
 						this.root.attributes.expanded = false;
 						this.root.id = "/nexus/service/local/dependees/"+this.root.text;
+						this.root.reload();
 					},
 
 					indexBrowserExpandFollowup : function(node) {
@@ -223,7 +224,6 @@ Ext
 
 					refreshHandler : function(button, e) {
 						this.showDependees(this.rootArtifact);
-						this.root.reload();
 					},
 
 					startSearch : function(p) {
