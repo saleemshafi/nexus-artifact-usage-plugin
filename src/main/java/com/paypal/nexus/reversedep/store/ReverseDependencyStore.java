@@ -39,4 +39,18 @@ public interface ReverseDependencyStore {
 	 *            The artifact being removed from the repository
 	 */
 	void removeDependee(Artifact dependee);
+
+	/**
+	 * Returns whether or not the artifact at the given path has already been
+	 * processed for dependencies since that last time the artifact was
+	 * modified.
+	 * 
+	 * @param path
+	 *            location of the artifact for identification purposes
+	 * @param lastModifiedTime
+	 *            the time in milliseconds that the file was last modified
+	 * @return true if the last time we calculated the dependencies for the
+	 *         given artifact was after the lastModifiedTime.
+	 */
+	boolean isAlreadyCalculated(String path, long lastModifiedTime);
 }

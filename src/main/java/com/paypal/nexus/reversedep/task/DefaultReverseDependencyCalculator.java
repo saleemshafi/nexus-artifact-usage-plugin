@@ -29,10 +29,11 @@ import org.sonatype.nexus.proxy.walker.DottedStoreWalkerFilter;
 import org.sonatype.nexus.proxy.walker.Walker;
 import org.sonatype.nexus.proxy.walker.WalkerContext;
 
+import com.paypal.nexus.reversedep.store.Artifact;
 import com.paypal.nexus.reversedep.store.ReverseDependencyStore;
 
 /**
- * Main implementation of a ReverseDependencyCalculator.  Largely based on the 
+ * Main implementation of a ReverseDependencyCalculator. Largely based on the
  * DefaultSnapshotRemover.
  * 
  * @author Saleem Shafi
@@ -124,17 +125,21 @@ public class DefaultReverseDependencyCalculator extends AbstractLogEnabled
 		// getLogger().info("Calculating reverse dependencies for "
 		// + item.getRepositoryItemUid().getPath());
 
-		// TODO: probably ought to have some way of skipping the files that
-		// haven't changed since the last time we did this					
-		
+		// don't bother if the file hasn't changed since
+		// the last time it was processed
+		if (this.dependencyStore.isAlreadyCalculated(item
+				.getRepositoryItemUid().getPath(), item.getModified())) {
+			return;
+		}
+
 		// convert to a Maven project
 		InputStream input = item.getContentLocator().getContent();
 		MavenProject project = getMavenProject(input);
-		Collection<com.paypal.nexus.reversedep.store.Artifact> artifactDependencies = new ArrayList<com.paypal.nexus.reversedep.store.Artifact>();
+		Collection<Artifact> artifactDependencies = new ArrayList<Artifact>();
 		if (project != null) {
-			com.paypal.nexus.reversedep.store.Artifact artifact = new com.paypal.nexus.reversedep.store.Artifact(
-					project.getGroupId(), project.getArtifactId(),
-					project.getVersion());
+			Artifact artifact = new Artifact(project.getGroupId(),
+					project.getArtifactId(), project.getVersion(), item
+							.getRepositoryItemUid().getPath());
 			for (Dependency dependency : (List<Dependency>) project
 					.getDependencies()) {
 				// TODO: figure out why the logger is null
@@ -144,11 +149,8 @@ public class DefaultReverseDependencyCalculator extends AbstractLogEnabled
 				// + dependency.getArtifactId() + ":"
 				// + dependency.getVersion());
 				// }
-				artifactDependencies
-						.add(new com.paypal.nexus.reversedep.store.Artifact(
-								dependency.getGroupId(), dependency
-										.getArtifactId(), dependency
-										.getVersion()));
+				artifactDependencies.add(new Artifact(dependency.getGroupId(),
+						dependency.getArtifactId(), dependency.getVersion()));
 			}
 			dependencyStore.addDependee(artifact, artifactDependencies);
 		}
@@ -163,9 +165,9 @@ public class DefaultReverseDependencyCalculator extends AbstractLogEnabled
 		InputStream input = item.getContentLocator().getContent();
 		MavenProject project = getMavenProject(input);
 		if (project != null) {
-			com.paypal.nexus.reversedep.store.Artifact artifact = new com.paypal.nexus.reversedep.store.Artifact(
-					project.getGroupId(), project.getArtifactId(),
-					project.getVersion());
+			Artifact artifact = new Artifact(project.getGroupId(),
+					project.getArtifactId(), project.getVersion(), item
+							.getRepositoryItemUid().getPath());
 			dependencyStore.removeDependee(artifact);
 		}
 	}

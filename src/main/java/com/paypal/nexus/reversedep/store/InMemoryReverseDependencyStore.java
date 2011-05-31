@@ -23,7 +23,11 @@ public class InMemoryReverseDependencyStore extends AbstractLogEnabled
 	private Map<Artifact, Collection<Artifact>> dependeeMap = new HashMap<Artifact, Collection<Artifact>>();
 	// we need this one, too, so that we can clean up old dependee settings if
 	// an artifact is updated
-	private Map<Artifact, Collection<Artifact>> dependencyMap = new HashMap<Artifact, Collection<Artifact>>();
+	private Map<Artifact, DependencyList> dependencyMap = new HashMap<Artifact, DependencyList>();
+	// allow us to convert the a StorageFileItem path to an Artifact so that we
+	// can coordinate the IsAlreadyCalculated logic with the actual dependee
+	// stuff
+	private Map<String, Artifact> pathMap = new HashMap<String, Artifact>();
 
 	public Collection<Artifact> getDependees(Artifact dependency) {
 		Collection<Artifact> dependees = dependeeMap.get(dependency);
@@ -35,12 +39,20 @@ public class InMemoryReverseDependencyStore extends AbstractLogEnabled
 
 	public void addDependee(Artifact dependee, Collection<Artifact> dependencies) {
 		// remove all of the old dependee mappings
-		Collection<Artifact> oldDependencies = dependencyMap.get(dependee);
-		if (oldDependencies != null) {
-			this.removeDependee(dependee, oldDependencies);
+		DependencyList oldDependencies = dependencyMap.get(dependee);
+		if (oldDependencies != null
+				&& oldDependencies.getDependencies() != null) {
+			this.removeDependee(dependee, oldDependencies.getDependencies());
 		}
 		// remember the dependencies so that we can clean up next time
-		dependencyMap.put(dependee, dependencies);
+		DependencyList newDependencies = new DependencyList(dependencies);
+		dependencyMap.put(dependee, newDependencies);
+
+		// remember where the associated file is located so we can compare
+		// file modification time next time we try to calculate
+		if (dependee.getPath() != null) {
+			this.pathMap.put(dependee.getPath(), dependee);
+		}
 		if (dependencies != null) {
 			// go through all of the dependencies
 			synchronized (this.dependeeMap) {
@@ -56,6 +68,14 @@ public class InMemoryReverseDependencyStore extends AbstractLogEnabled
 				}
 			}
 		}
+	}
+
+	public boolean isAlreadyCalculated(String path, long lastModifiedTime) {
+		Artifact artifact = this.pathMap.get(path);
+		if (artifact == null)
+			return false;
+		DependencyList dependencies = this.dependencyMap.get(artifact);
+		return (dependencies != null && dependencies.getLastCalculated() > lastModifiedTime);
 	}
 
 	// Removing a dependee from this map is handled as the case of adding

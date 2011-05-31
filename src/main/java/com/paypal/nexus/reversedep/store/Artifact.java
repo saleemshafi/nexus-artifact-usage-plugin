@@ -7,12 +7,19 @@ public class Artifact {
 	private String groupId;
 	private String artifactId;
 	private String version;
+	private String path;
 	private String text;
 
 	public Artifact(String groupId, String artifactId, String version) {
+		this(groupId, artifactId, version, null);
+	}
+
+	public Artifact(String groupId, String artifactId, String version,
+			String path) {
 		this.groupId = groupId;
 		this.artifactId = artifactId;
 		this.version = version;
+		this.path = path;
 
 		this.text = groupId + ":" + artifactId + ":" + version;
 	}
@@ -38,6 +45,10 @@ public class Artifact {
 
 	public String getVersion() {
 		return version;
+	}
+
+	public String getPath() {
+		return path;
 	}
 
 	public String toString() {
