@@ -1,4 +1,4 @@
-package com.paypal.nexus.reversedep.rest;
+package org.ebayopensource.nexus.reversedep.rest;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -8,9 +8,9 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.ebayopensource.nexus.reversedep.store.Artifact;
 import org.sonatype.nexus.rest.model.NexusResponse;
 
-import com.paypal.nexus.reversedep.store.Artifact;
 
 @XmlRootElement(name = "dependeeresponse")
 public class DependeeListResourceResponse extends NexusResponse implements

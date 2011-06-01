@@ -1,4 +1,4 @@
-package com.paypal.nexus.reversedep.store;
+package org.ebayopensource.nexus.reversedep.store;
 
 import javax.xml.bind.annotation.XmlType;
 

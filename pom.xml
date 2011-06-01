@@ -4,11 +4,11 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>com.paypal.nexus.reversedep</groupId>
+	<groupId>org.ebayopensource.nexus.reversedep</groupId>
 	<artifactId>reverse-dependency-plugin</artifactId>
 	<version>1.0-SNAPSHOT</version>
     <packaging>nexus-plugin</packaging>
-	<name>Paypal : Reverse Dependency Plugin</name>
+	<name>Ebay : Reverse Dependency Plugin</name>
 	<description>Adds reverse dependency visibility to locally stored artifacts</description>
 
 	<properties>

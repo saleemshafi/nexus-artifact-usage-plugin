@@ -1,13 +1,13 @@
-package com.paypal.nexus.reversedep.task;
+package org.ebayopensource.nexus.reversedep.task;
 
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
+import org.ebayopensource.nexus.reversedep.task.descriptors.ReverseDependencyCalculationTaskDescriptor;
 import org.sonatype.nexus.proxy.repository.HostedRepository;
 import org.sonatype.nexus.proxy.repository.Repository;
 import org.sonatype.nexus.scheduling.AbstractNexusRepositoriesTask;
 import org.sonatype.scheduling.SchedulerTask;
 
-import com.paypal.nexus.reversedep.task.descriptors.ReverseDependencyCalculationTaskDescriptor;
 
 /**
  * Scheduled task to build reverse dependency mapping for all artifacts in a

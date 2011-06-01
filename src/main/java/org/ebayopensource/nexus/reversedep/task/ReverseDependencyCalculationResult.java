@@ -1,9 +1,10 @@
-package com.paypal.nexus.reversedep.task;
+package org.ebayopensource.nexus.reversedep.task;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
-import com.paypal.nexus.reversedep.store.Artifact;
+import org.ebayopensource.nexus.reversedep.store.Artifact;
+
 
 /**
  * The result of calculating the reverse dependencies for the artifacts in

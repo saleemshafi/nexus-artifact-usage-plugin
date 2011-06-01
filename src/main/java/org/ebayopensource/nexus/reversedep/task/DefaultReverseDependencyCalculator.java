@@ -1,4 +1,4 @@
-package com.paypal.nexus.reversedep.task;
+package org.ebayopensource.nexus.reversedep.task;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,6 +15,8 @@ import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.AbstractLogEnabled;
+import org.ebayopensource.nexus.reversedep.store.Artifact;
+import org.ebayopensource.nexus.reversedep.store.ReverseDependencyStore;
 import org.sonatype.nexus.proxy.NoSuchRepositoryException;
 import org.sonatype.nexus.proxy.ResourceStoreRequest;
 import org.sonatype.nexus.proxy.item.StorageFileItem;
@@ -29,8 +31,6 @@ import org.sonatype.nexus.proxy.walker.DottedStoreWalkerFilter;
 import org.sonatype.nexus.proxy.walker.Walker;
 import org.sonatype.nexus.proxy.walker.WalkerContext;
 
-import com.paypal.nexus.reversedep.store.Artifact;
-import com.paypal.nexus.reversedep.store.ReverseDependencyStore;
 
 /**
  * Main implementation of a ReverseDependencyCalculator. Largely based on the

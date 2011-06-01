@@ -1,4 +1,4 @@
-package com.paypal.nexus.reversedep.task;
+package org.ebayopensource.nexus.reversedep.task;
 
 /**
  * Wrapper class for the arguments needed to process a repository's artifacts

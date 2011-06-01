@@ -1,4 +1,4 @@
-package com.paypal.nexus.reversedep.rest;
+package org.ebayopensource.nexus.reversedep.rest;
 
 import java.util.Collection;
 
@@ -7,6 +7,8 @@ import javax.ws.rs.Produces;
 
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
+import org.ebayopensource.nexus.reversedep.store.Artifact;
+import org.ebayopensource.nexus.reversedep.store.ReverseDependencyStore;
 import org.restlet.Context;
 import org.restlet.data.Request;
 import org.restlet.data.Response;
@@ -16,8 +18,6 @@ import org.sonatype.nexus.rest.AbstractNexusPlexusResource;
 import org.sonatype.plexus.rest.resource.PathProtectionDescriptor;
 import org.sonatype.plexus.rest.resource.PlexusResource;
 
-import com.paypal.nexus.reversedep.store.Artifact;
-import com.paypal.nexus.reversedep.store.ReverseDependencyStore;
 
 @Produces({ "application/xml", "application/json" })
 @Consumes({ "application/xml", "application/json" })

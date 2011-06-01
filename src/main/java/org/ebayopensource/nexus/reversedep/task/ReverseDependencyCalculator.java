@@ -1,4 +1,4 @@
-package com.paypal.nexus.reversedep.task;
+package org.ebayopensource.nexus.reversedep.task;
 
 import java.io.IOException;
 

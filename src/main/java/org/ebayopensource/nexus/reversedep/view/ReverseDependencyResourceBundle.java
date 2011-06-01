@@ -1,4 +1,4 @@
-package com.paypal.nexus.reversedep.view;
+package org.ebayopensource.nexus.reversedep.view;
 
 import java.util.ArrayList;
 import java.util.List;

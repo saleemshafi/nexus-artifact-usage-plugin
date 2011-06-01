@@ -1,4 +1,4 @@
-package com.paypal.nexus.reversedep.task.descriptors;
+package org.ebayopensource.nexus.reversedep.task.descriptors;
 
 import java.util.ArrayList;
 import java.util.List;

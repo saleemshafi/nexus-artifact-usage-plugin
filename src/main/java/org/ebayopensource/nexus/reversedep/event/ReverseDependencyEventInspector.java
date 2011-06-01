@@ -1,4 +1,4 @@
-package com.paypal.nexus.reversedep.event;
+package org.ebayopensource.nexus.reversedep.event;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,6 +15,7 @@ import org.codehaus.plexus.PlexusContainerException;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.component.repository.exception.ComponentLookupException;
+import org.ebayopensource.nexus.reversedep.task.ReverseDependencyCalculator;
 import org.sonatype.nexus.proxy.events.AbstractEventInspector;
 import org.sonatype.nexus.proxy.events.EventInspector;
 import org.sonatype.nexus.proxy.events.RepositoryItemEventDelete;
@@ -24,7 +25,6 @@ import org.sonatype.nexus.proxy.item.StorageItem;
 import org.sonatype.nexus.proxy.repository.HostedRepository;
 import org.sonatype.plexus.appevents.Event;
 
-import com.paypal.nexus.reversedep.task.ReverseDependencyCalculator;
 
 /**
  * Event handler that updates the reverse dependency mappings whenever an
