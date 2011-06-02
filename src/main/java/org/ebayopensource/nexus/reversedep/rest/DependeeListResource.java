@@ -18,7 +18,6 @@ import org.sonatype.nexus.rest.AbstractNexusPlexusResource;
 import org.sonatype.plexus.rest.resource.PathProtectionDescriptor;
 import org.sonatype.plexus.rest.resource.PlexusResource;
 
-
 @Produces({ "application/xml", "application/json" })
 @Consumes({ "application/xml", "application/json" })
 @Component(role = PlexusResource.class, hint = "com.paypal.nexus.ReverseDependencyResource")
@@ -38,6 +37,8 @@ public class DependeeListResource extends AbstractNexusPlexusResource {
 		// getLogger().info("getting dependees for "+request.getResourceRef().getLastSegment());
 		DependeeListResourceResponse res = new DependeeListResourceResponse();
 
+		// TODO: would love the ability to get multiple levels in one request,
+		// perhaps even the whole tree
 		Collection<Artifact> dependees = dependeeStore
 				.getDependees(new Artifact(request.getResourceRef()
 						.getLastSegment()));

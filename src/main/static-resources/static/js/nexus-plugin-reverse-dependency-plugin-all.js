@@ -62,6 +62,8 @@ Sonatype.repoServer.ReverseDependencyPanel = function(config) {
 									scope : this,
 									handler : this.refreshHandler
 								},
+// TODO: need to be able to get a full tree at once, perhaps as a json or text file
+// TODO: need to be able to filter by scope
 								' '
 // Commenting this out 'cause it doesn't quite work the way it ought to.  Not
 // sure that it even makes sense if the full tree isn't populated.
