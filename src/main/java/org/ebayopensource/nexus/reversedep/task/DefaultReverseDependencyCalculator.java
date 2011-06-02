@@ -5,18 +5,27 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import org.apache.maven.index.artifact.Gav;
-import org.apache.maven.model.Dependency;
 import org.apache.maven.model.Model;
 import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.repository.internal.DefaultServiceLocator;
+import org.apache.maven.repository.internal.MavenRepositorySystemSession;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.AbstractLogEnabled;
 import org.ebayopensource.nexus.reversedep.store.Artifact;
 import org.ebayopensource.nexus.reversedep.store.ReverseDependencyStore;
+import org.sonatype.aether.RepositorySystem;
+import org.sonatype.aether.connector.file.FileRepositoryConnectorFactory;
+import org.sonatype.aether.repository.LocalRepository;
+import org.sonatype.aether.repository.RemoteRepository;
+import org.sonatype.aether.resolution.ArtifactDescriptorException;
+import org.sonatype.aether.resolution.ArtifactDescriptorRequest;
+import org.sonatype.aether.resolution.ArtifactDescriptorResult;
+import org.sonatype.aether.spi.connector.RepositoryConnectorFactory;
+import org.sonatype.aether.util.artifact.DefaultArtifact;
 import org.sonatype.nexus.proxy.NoSuchRepositoryException;
 import org.sonatype.nexus.proxy.ResourceStoreRequest;
 import org.sonatype.nexus.proxy.item.StorageFileItem;
@@ -30,7 +39,6 @@ import org.sonatype.nexus.proxy.walker.DefaultWalkerContext;
 import org.sonatype.nexus.proxy.walker.DottedStoreWalkerFilter;
 import org.sonatype.nexus.proxy.walker.Walker;
 import org.sonatype.nexus.proxy.walker.WalkerContext;
-
 
 /**
  * Main implementation of a ReverseDependencyCalculator. Largely based on the
@@ -120,7 +128,7 @@ public class DefaultReverseDependencyCalculator extends AbstractLogEnabled
 	}
 
 	public void calculateReverseDependencies(StorageFileItem item)
-			throws IOException {
+			throws IOException, ArtifactDescriptorException {
 		// TODO: figure out why the logger is null
 		// getLogger().info("Calculating reverse dependencies for "
 		// + item.getRepositoryItemUid().getPath());
@@ -140,18 +148,51 @@ public class DefaultReverseDependencyCalculator extends AbstractLogEnabled
 			Artifact artifact = new Artifact(project.getGroupId(),
 					project.getArtifactId(), project.getVersion(), item
 							.getRepositoryItemUid().getPath());
-			for (Dependency dependency : (List<Dependency>) project
+
+			DefaultServiceLocator locator = new DefaultServiceLocator();
+			locator.addService(RepositoryConnectorFactory.class,
+					FileRepositoryConnectorFactory.class);
+
+			RepositorySystem system = locator
+					.getService(RepositorySystem.class);
+
+			MavenRepositorySystemSession session = new MavenRepositorySystemSession();
+
+			LocalRepository localRepo = new LocalRepository("target/local-repo");
+			session.setLocalRepositoryManager(system
+					.newLocalRepositoryManager(localRepo));
+
+			ArtifactDescriptorRequest descriptorRequest = new ArtifactDescriptorRequest();
+			descriptorRequest.setArtifact(new DefaultArtifact(artifact
+					.toString()));
+			for (Repository repo : getRepositoryRegistry().getRepositories()) {
+				if (repo.getLocalUrl() != null) {
+					descriptorRequest.addRepository(new RemoteRepository(repo
+							.getId(),
+					// TODO: figure out what options there are for the 'type'
+					// param
+							"default", repo.getLocalUrl()));
+				}
+			}
+
+			ArtifactDescriptorResult descriptorResult = system
+					.readArtifactDescriptor(session, descriptorRequest);
+
+			for (org.sonatype.aether.graph.Dependency dependency : descriptorResult
 					.getDependencies()) {
 				// TODO: figure out why the logger is null
 				// if (getLogger().isDebugEnabled()) {
-				// getLogger().debug(project.getArtifactId() + " depends on "
-				// + dependency.getGroupId() + ":"
-				// + dependency.getArtifactId() + ":"
-				// + dependency.getVersion());
+				System.out.println(project.getArtifactId() + " depends on "
+						+ dependency.getArtifact().getGroupId() + ":"
+						+ dependency.getArtifact().getArtifactId() + ":"
+						+ dependency.getArtifact().getVersion());
 				// }
-				artifactDependencies.add(new Artifact(dependency.getGroupId(),
-						dependency.getArtifactId(), dependency.getVersion()));
+				artifactDependencies.add(new Artifact(dependency.getArtifact()
+						.getGroupId(),
+						dependency.getArtifact().getArtifactId(), dependency
+								.getArtifact().getVersion()));
 			}
+
 			dependencyStore.addDependee(artifact, artifactDependencies);
 		}
 	}

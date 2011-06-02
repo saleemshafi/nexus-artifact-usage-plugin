@@ -14,8 +14,8 @@
 	<properties>
 		<!-- Set the Nexus version here, against which you build the plugin -->
 		<nexus-version>1.9.1</nexus-version>
-	    <aetherVersion>1.11</aetherVersion>
-	    <mavenVersion>3.0.2</mavenVersion>
+	    <aetherVersion>1.8.1</aetherVersion>
+	    <mavenVersion>3.0.1</mavenVersion>
 	    <wagonVersion>1.0-beta-7</wagonVersion>
 	</properties>
 
@@ -69,6 +69,7 @@
       <groupId>org.sonatype.aether</groupId>
       <artifactId>aether-util</artifactId>
       <version>${aetherVersion}</version>
+      <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.sonatype.aether</groupId>
