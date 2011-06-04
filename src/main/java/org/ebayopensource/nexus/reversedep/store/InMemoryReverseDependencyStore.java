@@ -9,7 +9,6 @@ import java.util.Map;
 
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.logging.AbstractLogEnabled;
-import org.ebayopensource.nexus.reversedep.rest.Dependee;
 
 /**
  * An in-memory representation of the reverse dependency mappings. This version

@@ -2,7 +2,6 @@ package org.ebayopensource.nexus.reversedep.store;
 
 import java.util.Collection;
 
-import org.ebayopensource.nexus.reversedep.rest.Dependee;
 
 /**
  * Representation of a storage mechanism for the reverse dependencies. This is

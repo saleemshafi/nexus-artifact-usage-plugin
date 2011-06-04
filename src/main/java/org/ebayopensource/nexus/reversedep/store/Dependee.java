@@ -1,4 +1,4 @@
-package org.ebayopensource.nexus.reversedep.rest;
+package org.ebayopensource.nexus.reversedep.store;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -8,7 +8,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlType;
 
-import org.ebayopensource.nexus.reversedep.store.Artifact;
 
 @XmlType(name = "node")
 public class Dependee extends Artifact {

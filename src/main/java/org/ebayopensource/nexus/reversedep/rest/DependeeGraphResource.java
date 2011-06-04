@@ -7,6 +7,7 @@ import javax.ws.rs.Produces;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.ebayopensource.nexus.reversedep.store.Artifact;
+import org.ebayopensource.nexus.reversedep.store.Dependee;
 import org.ebayopensource.nexus.reversedep.store.ReverseDependencyStore;
 import org.restlet.Context;
 import org.restlet.data.MediaType;
