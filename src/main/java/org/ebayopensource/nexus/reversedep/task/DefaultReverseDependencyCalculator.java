@@ -1,6 +1,5 @@
 package org.ebayopensource.nexus.reversedep.task;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -23,6 +22,7 @@ import org.sonatype.aether.resolution.ArtifactDescriptorRequest;
 import org.sonatype.aether.resolution.ArtifactDescriptorResult;
 import org.sonatype.aether.spi.connector.RepositoryConnectorFactory;
 import org.sonatype.aether.util.artifact.DefaultArtifact;
+import org.sonatype.nexus.configuration.application.NexusConfiguration;
 import org.sonatype.nexus.proxy.NoSuchRepositoryException;
 import org.sonatype.nexus.proxy.ResourceStoreRequest;
 import org.sonatype.nexus.proxy.item.StorageFileItem;
@@ -60,6 +60,9 @@ public class DefaultReverseDependencyCalculator extends AbstractLogEnabled
 
 	@Requirement(hint = "InMemory")
 	private ReverseDependencyStore dependencyStore;
+
+	@Requirement
+	private NexusConfiguration nexusConfig;
 
 	public ReverseDependencyCalculationResult calculateReverseDependencies(
 			ReverseDependencyCalculationRequest request)
@@ -223,7 +226,8 @@ public class DefaultReverseDependencyCalculator extends AbstractLogEnabled
 	 */
 	Artifact getArtifactForStorageItem(StorageFileItem item) throws IOException {
 		try {
-			PomArtifactManager mgr = new PomArtifactManager(new File("/tmp"));
+			PomArtifactManager mgr = new PomArtifactManager(
+					this.nexusConfig.getTemporaryDirectory());
 			mgr.storeTempPomFile(item.getInputStream());
 			ArtifactCoordinate ac = mgr.getArtifactCoordinateFromTempPomFile();
 			return new Artifact(ac.getGroupId(), ac.getArtifactId(),

@@ -1,19 +1,15 @@
 package org.ebayopensource.nexus.reversedep.task;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-
 import java.io.FileInputStream;
 import java.io.InputStream;
 
 import org.ebayopensource.nexus.reversedep.store.Artifact;
-import org.junit.Test;
 import org.mockito.Mockito;
+import org.sonatype.nexus.AbstractNexusTestCase;
 import org.sonatype.nexus.proxy.item.RepositoryItemUid;
 import org.sonatype.nexus.proxy.item.StorageFileItem;
 
-public class TestMavenProjectParsing {
-	@Test
+public class TestMavenProjectParsing extends AbstractNexusTestCase {
 	public void testGetGavFromSimplePom() throws Exception {
 		// convert to a Maven project
 		InputStream input = new FileInputStream(
@@ -26,7 +22,8 @@ public class TestMavenProjectParsing {
 		Mockito.when(pomFileItem.getRepositoryItemUid()).thenReturn(itemUid);
 		Mockito.when(pomFileItem.getInputStream()).thenReturn(input);
 
-		Artifact artifact = new DefaultReverseDependencyCalculator()
+		Artifact artifact = ((DefaultReverseDependencyCalculator) this
+				.lookup(ReverseDependencyCalculator.class))
 				.getArtifactForStorageItem(pomFileItem);
 		assertNotNull(artifact);
 		assertEquals("org.ebayopensource.nexus.reversedep",
@@ -35,7 +32,6 @@ public class TestMavenProjectParsing {
 		assertEquals("1.0-SNAPSHOT", artifact.getVersion());
 	}
 
-	@Test
 	public void testGetGavFromPomWithParent() throws Exception {
 		// convert to a Maven project
 		InputStream input = new FileInputStream(
@@ -48,7 +44,8 @@ public class TestMavenProjectParsing {
 		Mockito.when(pomFileItem.getRepositoryItemUid()).thenReturn(itemUid);
 		Mockito.when(pomFileItem.getInputStream()).thenReturn(input);
 
-		Artifact artifact = new DefaultReverseDependencyCalculator()
+		Artifact artifact = ((DefaultReverseDependencyCalculator) this
+				.lookup(ReverseDependencyCalculator.class))
 				.getArtifactForStorageItem(pomFileItem);
 		assertNotNull(artifact);
 		assertEquals("org.sonatype.nexus", artifact.getGroupId());
@@ -57,7 +54,6 @@ public class TestMavenProjectParsing {
 
 	}
 
-	@Test
 	public void testGetGavFromPomWithProperties() throws Exception {
 		// convert to a Maven project
 		InputStream input = new FileInputStream(
@@ -70,7 +66,8 @@ public class TestMavenProjectParsing {
 		Mockito.when(pomFileItem.getRepositoryItemUid()).thenReturn(itemUid);
 		Mockito.when(pomFileItem.getInputStream()).thenReturn(input);
 
-		Artifact artifact = new DefaultReverseDependencyCalculator()
+		Artifact artifact = ((DefaultReverseDependencyCalculator) this
+				.lookup(ReverseDependencyCalculator.class))
 				.getArtifactForStorageItem(pomFileItem);
 		assertNotNull(artifact);
 		assertEquals("org.ebayopensource.nexus.reversedep",
