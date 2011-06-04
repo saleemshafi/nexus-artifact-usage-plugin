@@ -1,5 +1,6 @@
 package org.ebayopensource.nexus.reversedep.store;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -8,6 +9,7 @@ import java.util.Map;
 
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.logging.AbstractLogEnabled;
+import org.ebayopensource.nexus.reversedep.rest.Dependee;
 
 /**
  * An in-memory representation of the reverse dependency mappings. This version
@@ -35,6 +37,20 @@ public class InMemoryReverseDependencyStore extends AbstractLogEnabled
 			return Collections.emptyList();
 		}
 		return Collections.unmodifiableCollection(dependees);
+	}
+
+	public Collection<Dependee> getTransitiveDependees(Artifact dependency) {
+		Collection<Dependee> dependees = new ArrayList<Dependee>();
+		for (Artifact artifact : this.getDependees(dependency)) {
+			Dependee dependee = new Dependee(artifact.getGroupId(),
+					artifact.getArtifactId(), artifact.getVersion(),
+					artifact.getPath());
+			for (Dependee transitiveDependee : getTransitiveDependees(artifact)) {
+				dependee.addDependee(transitiveDependee);
+			}
+			dependees.add(dependee);
+		}
+		return dependees;
 	}
 
 	public void addDependee(Artifact dependee, Collection<Artifact> dependencies) {

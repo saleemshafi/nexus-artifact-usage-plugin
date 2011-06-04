@@ -9,7 +9,7 @@ Sonatype.Events.addListener('fileContainerUpdate', function(artifactContainer,
 		data) {
 	var panel = artifactContainer.find('name', 'reverseDependencyPanel')[0];
 	if (data == null || !data.leaf) {
-		// panel.showArtifact(null, artifactContainer);
+		// panel.showDependeesForResource(null, artifactContainer);
 	} else {
 		panel.showDependeesForResource(data, artifactContainer);
 	}
@@ -26,7 +26,7 @@ Sonatype.Events.addListener('artifactContainerUpdate', function(
 		artifactContainer, payload) {
 	var panel = artifactContainer.find('name', 'reverseDependencyPanel')[0];
 	if (payload == null || !payload.leaf) {
-		// panel.showArtifact(null, artifactContainer);
+		// panel.showDependeesForResource(null, artifactContainer);
 	} else {
 		panel.showDependeesForResource(payload, artifactContainer);
 	}
@@ -62,6 +62,16 @@ Sonatype.repoServer.ReverseDependencyPanel = function(config) {
 									scope : this,
 									handler : this.refreshHandler
 								},
+								' ',
+								{
+									text : 'Full Dependee Graph',
+									icon : Sonatype.config.resourcePath
+											+ '/images/icons/page_white_put.png',
+									cls : 'x-btn-text-icon',
+									scope : this,
+									handler : this.downloadGraphHandler
+								},
+								
 // TODO: need to be able to get a full tree at once, perhaps as a json or text file
 // TODO: need to be able to filter by scope
 								' '
@@ -226,6 +236,10 @@ Ext
 
 					refreshHandler : function(button, e) {
 						this.showDependees(this.rootArtifact);
+					},
+					
+					downloadGraphHandler : function(button, e) {
+						window.open("/nexus/service/local/dependeeGraph/"+this.root.text+".json");
 					},
 
 					startSearch : function(p) {

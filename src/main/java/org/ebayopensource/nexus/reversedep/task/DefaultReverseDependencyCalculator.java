@@ -158,6 +158,8 @@ public class DefaultReverseDependencyCalculator extends AbstractLogEnabled
 
 			MavenRepositorySystemSession session = new MavenRepositorySystemSession();
 
+			// TODO: see if there's a way to implement a local repo manager that
+			// doesn't bother writing anything to disk.
 			LocalRepository localRepo = new LocalRepository("target/local-repo");
 			session.setLocalRepositoryManager(system
 					.newLocalRepositoryManager(localRepo));

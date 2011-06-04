@@ -2,6 +2,8 @@ package org.ebayopensource.nexus.reversedep.store;
 
 import java.util.Collection;
 
+import org.ebayopensource.nexus.reversedep.rest.Dependee;
+
 /**
  * Representation of a storage mechanism for the reverse dependencies. This is
  * essentially a mapping between projects and their dependencies, but oriented
@@ -53,4 +55,15 @@ public interface ReverseDependencyStore {
 	 *         given artifact was after the lastModifiedTime.
 	 */
 	boolean isAlreadyCalculated(String path, long lastModifiedTime);
+
+	/**
+	 * Returns a list of dependees for the given artifact, and each Dependee
+	 * returned also has a list of its dependees, etc., until it hits the leaf
+	 * nodes.
+	 * 
+	 * @param dependency
+	 *            the Artifact that is depended upon
+	 * @return list of dependees resolved transitively
+	 */
+	Collection<Dependee> getTransitiveDependees(Artifact dependency);
 }

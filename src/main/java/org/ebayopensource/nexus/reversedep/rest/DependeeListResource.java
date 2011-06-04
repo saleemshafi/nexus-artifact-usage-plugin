@@ -20,7 +20,7 @@ import org.sonatype.plexus.rest.resource.PlexusResource;
 
 @Produces({ "application/xml", "application/json" })
 @Consumes({ "application/xml", "application/json" })
-@Component(role = PlexusResource.class, hint = "com.paypal.nexus.ReverseDependencyResource")
+@Component(role = PlexusResource.class, hint = "org.ebayopensource.nexus.reversedep.rest.DependeeListResource")
 public class DependeeListResource extends AbstractNexusPlexusResource {
 	@Requirement(hint = "InMemory")
 	private ReverseDependencyStore dependeeStore;
