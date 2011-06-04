@@ -1,15 +1,12 @@
 package org.ebayopensource.nexus.reversedep.task;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 
 import org.apache.maven.index.artifact.Gav;
-import org.apache.maven.model.Model;
-import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
-import org.apache.maven.project.MavenProject;
 import org.apache.maven.repository.internal.DefaultServiceLocator;
 import org.apache.maven.repository.internal.MavenRepositorySystemSession;
 import org.codehaus.plexus.component.annotations.Component;
@@ -39,6 +36,8 @@ import org.sonatype.nexus.proxy.walker.DefaultWalkerContext;
 import org.sonatype.nexus.proxy.walker.DottedStoreWalkerFilter;
 import org.sonatype.nexus.proxy.walker.Walker;
 import org.sonatype.nexus.proxy.walker.WalkerContext;
+import org.sonatype.nexus.rest.artifact.PomArtifactManager;
+import org.sonatype.nexus.rest.model.ArtifactCoordinate;
 
 /**
  * Main implementation of a ReverseDependencyCalculator. Largely based on the
@@ -129,9 +128,11 @@ public class DefaultReverseDependencyCalculator extends AbstractLogEnabled
 
 	public void calculateReverseDependencies(StorageFileItem item)
 			throws IOException, ArtifactDescriptorException {
-		// TODO: figure out why the logger is null
-		// getLogger().info("Calculating reverse dependencies for "
-		// + item.getRepositoryItemUid().getPath());
+		if (getLogger().isInfoEnabled()) {
+			getLogger().info(
+					"Calculating reverse dependencies for "
+							+ item.getRepositoryItemUid().getPath());
+		}
 
 		// don't bother if the file hasn't changed since
 		// the last time it was processed
@@ -142,13 +143,9 @@ public class DefaultReverseDependencyCalculator extends AbstractLogEnabled
 
 		// convert to a Maven project
 		InputStream input = item.getContentLocator().getContent();
-		MavenProject project = getMavenProject(input);
 		Collection<Artifact> artifactDependencies = new ArrayList<Artifact>();
-		if (project != null) {
-			Artifact artifact = new Artifact(project.getGroupId(),
-					project.getArtifactId(), project.getVersion(), item
-							.getRepositoryItemUid().getPath());
-
+		Artifact artifact = getArtifactForStorageItem(item);
+		if (artifact != null) {
 			DefaultServiceLocator locator = new DefaultServiceLocator();
 			locator.addService(RepositoryConnectorFactory.class,
 					FileRepositoryConnectorFactory.class);
@@ -182,13 +179,15 @@ public class DefaultReverseDependencyCalculator extends AbstractLogEnabled
 
 			for (org.sonatype.aether.graph.Dependency dependency : descriptorResult
 					.getDependencies()) {
-				// TODO: figure out why the logger is null
-				// if (getLogger().isDebugEnabled()) {
-				System.out.println(project.getArtifactId() + " depends on "
-						+ dependency.getArtifact().getGroupId() + ":"
-						+ dependency.getArtifact().getArtifactId() + ":"
-						+ dependency.getArtifact().getVersion());
-				// }
+				if (getLogger().isDebugEnabled()) {
+					getLogger().debug(
+							artifact.getArtifactId() + " depends on "
+									+ dependency.getArtifact().getGroupId()
+									+ ":"
+									+ dependency.getArtifact().getArtifactId()
+									+ ":"
+									+ dependency.getArtifact().getVersion());
+				}
 				artifactDependencies.add(new Artifact(dependency.getArtifact()
 						.getGroupId(),
 						dependency.getArtifact().getArtifactId(), dependency
@@ -201,45 +200,41 @@ public class DefaultReverseDependencyCalculator extends AbstractLogEnabled
 
 	public void removeReverseDependencies(StorageFileItem item)
 			throws IOException {
-		// TODO: figure out why the logger is null
-		// getLogger().info("Removing reverse dependencies for "
-		// + item.getRepositoryItemUid().getPath());
+		if (getLogger().isInfoEnabled()) {
+			getLogger().info(
+					"Removing reverse dependencies for "
+							+ item.getRepositoryItemUid().getPath());
+		}
 
 		InputStream input = item.getContentLocator().getContent();
-		MavenProject project = getMavenProject(input);
-		if (project != null) {
-			Artifact artifact = new Artifact(project.getGroupId(),
-					project.getArtifactId(), project.getVersion(), item
-							.getRepositoryItemUid().getPath());
+		Artifact artifact = getArtifactForStorageItem(item);
+		if (artifact != null) {
 			dependencyStore.removeDependee(artifact);
 		}
 	}
 
 	/**
-	 * Reads the POM file represented by the input stream and returns a
-	 * deserialized MavenProject. Returns null if there was a problem reading
-	 * the POM file.
+	 * Converts a POM file into an Artifact that holds the GAV data for the pom.
 	 * 
-	 * @param pomStream
-	 *            the InputStream containing the POM file
-	 * @return a deserialize MavenProject
+	 * @param item
+	 *            StorageFileItem representing a POM file
+	 * @return an Artifact containing the GAV information in the file
+	 * @throws IOException
 	 */
-	MavenProject getMavenProject(InputStream pomStream) {
-		Model model = null;
-		InputStreamReader reader = null;
-		MavenProject project = null;
-		MavenXpp3Reader mavenreader = new MavenXpp3Reader();
+	Artifact getArtifactForStorageItem(StorageFileItem item) throws IOException {
 		try {
-			reader = new InputStreamReader(pomStream);
-			model = mavenreader.read(reader);
-			project = new MavenProject(model);
-
-		} catch (Exception ex) {
-			// TODO: figure out why the logger is null
-			// getLogger().error("Error processing the POM file", ex);
-			// TODO: probably should just be squashing the exception either
+			PomArtifactManager mgr = new PomArtifactManager(new File("/tmp"));
+			mgr.storeTempPomFile(item.getInputStream());
+			ArtifactCoordinate ac = mgr.getArtifactCoordinateFromTempPomFile();
+			return new Artifact(ac.getGroupId(), ac.getArtifactId(),
+					ac.getVersion(), item.getRepositoryItemUid().getPath());
+		} catch (Exception e) {
+			getLogger()
+					.error("Error processing POM file for reverse dependency information.",
+							e);
+			return null;
 		}
-		return project;
+
 	}
 
 	private class ReverseDependencyCalculationWalkerProcessor extends

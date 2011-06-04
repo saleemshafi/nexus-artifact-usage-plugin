@@ -37,8 +37,11 @@ public class DependeeGraphResource extends AbstractNexusPlexusResource {
 	@Override
 	public Object get(Context context, Request request, Response response,
 			Variant variant) throws ResourceException {
-		// TODO: Figure out why this is creating NPE
-		// getLogger().info("getting dependees for "+request.getResourceRef().getLastSegment());
+		if (getLogger().isDebugEnabled()) {
+			getLogger().debug(
+					"getting dependees for "
+							+ request.getResourceRef().getLastSegment());
+		}
 		DependeeGraphResourceResponse res = new DependeeGraphResourceResponse();
 
 		// TODO: would love the ability to get multiple levels in one request,
