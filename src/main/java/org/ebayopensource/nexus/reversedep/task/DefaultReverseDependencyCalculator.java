@@ -1,27 +1,14 @@
 package org.ebayopensource.nexus.reversedep.task;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collection;
 
 import org.apache.maven.index.artifact.Gav;
-import org.apache.maven.repository.internal.DefaultServiceLocator;
-import org.apache.maven.repository.internal.MavenRepositorySystemSession;
+import org.apache.maven.index.artifact.GavCalculator;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.AbstractLogEnabled;
 import org.ebayopensource.nexus.reversedep.store.Artifact;
 import org.ebayopensource.nexus.reversedep.store.ReverseDependencyStore;
-import org.sonatype.aether.RepositorySystem;
-import org.sonatype.aether.connector.file.FileRepositoryConnectorFactory;
-import org.sonatype.aether.repository.LocalRepository;
-import org.sonatype.aether.repository.RemoteRepository;
-import org.sonatype.aether.resolution.ArtifactDescriptorException;
-import org.sonatype.aether.resolution.ArtifactDescriptorRequest;
-import org.sonatype.aether.resolution.ArtifactDescriptorResult;
-import org.sonatype.aether.spi.connector.RepositoryConnectorFactory;
-import org.sonatype.aether.util.artifact.DefaultArtifact;
 import org.sonatype.nexus.configuration.application.NexusConfiguration;
 import org.sonatype.nexus.proxy.NoSuchRepositoryException;
 import org.sonatype.nexus.proxy.ResourceStoreRequest;
@@ -50,9 +37,6 @@ public class DefaultReverseDependencyCalculator extends AbstractLogEnabled
 		implements ReverseDependencyCalculator {
 
 	@Requirement
-	private RepositoryRegistry repositoryRegistry;
-
-	@Requirement
 	private Walker walker;
 
 	@Requirement(hint = "maven2")
@@ -61,8 +45,14 @@ public class DefaultReverseDependencyCalculator extends AbstractLogEnabled
 	@Requirement(hint = "InMemory")
 	private ReverseDependencyStore dependencyStore;
 
+	@Requirement(hint = "AetherBased")
+	private DependencyResolver dependencyResolver;
+
 	@Requirement
 	private NexusConfiguration nexusConfig;
+
+	@Requirement
+	private RepositoryRegistry repositoryRegistry;
 
 	public ReverseDependencyCalculationResult calculateReverseDependencies(
 			ReverseDependencyCalculationRequest request)
@@ -70,8 +60,8 @@ public class DefaultReverseDependencyCalculator extends AbstractLogEnabled
 		ReverseDependencyCalculationResult result = new ReverseDependencyCalculationResult();
 
 		if (request.getRepositoryId() != null) {
-			Repository repository = getRepositoryRegistry().getRepository(
-					request.getRepositoryId());
+			Repository repository = this.repositoryRegistry
+					.getRepository(request.getRepositoryId());
 
 			if (MavenRepository.class.isAssignableFrom(repository.getClass())
 					&& repository.getRepositoryContentClass().isCompatible(
@@ -82,10 +72,9 @@ public class DefaultReverseDependencyCalculator extends AbstractLogEnabled
 						+ repository.getId() + " is not MavenRepository!");
 			}
 		} else {
-			for (Repository repository : getRepositoryRegistry()
+			for (Repository repository : this.repositoryRegistry
 					.getRepositories()) {
-				// only from maven repositories, stay silent for others and
-				// simply skip
+				// skip and repository that aren't Maven repositories
 				if (MavenRepository.class.isAssignableFrom(repository
 						.getClass())
 						&& repository.getRepositoryContentClass().isCompatible(
@@ -96,10 +85,6 @@ public class DefaultReverseDependencyCalculator extends AbstractLogEnabled
 		}
 
 		return result;
-	}
-
-	protected RepositoryRegistry getRepositoryRegistry() {
-		return repositoryRegistry;
 	}
 
 	/**
@@ -117,7 +102,7 @@ public class DefaultReverseDependencyCalculator extends AbstractLogEnabled
 				new ResourceStoreRequest("/"), new DottedStoreWalkerFilter());
 
 		ReverseDependencyCalculationWalkerProcessor reverseDependencyCalculationProcessor = new ReverseDependencyCalculationWalkerProcessor(
-				repository);
+				repository.getGavCalculator());
 		ctxMain.getProcessors().add(reverseDependencyCalculationProcessor);
 
 		walker.walk(ctxMain);
@@ -130,7 +115,7 @@ public class DefaultReverseDependencyCalculator extends AbstractLogEnabled
 	}
 
 	public void calculateReverseDependencies(StorageFileItem item)
-			throws IOException, ArtifactDescriptorException {
+			throws IOException {
 		if (getLogger().isInfoEnabled()) {
 			getLogger().info(
 					"Calculating reverse dependencies for "
@@ -145,59 +130,10 @@ public class DefaultReverseDependencyCalculator extends AbstractLogEnabled
 		}
 
 		// convert to a Maven project
-		InputStream input = item.getContentLocator().getContent();
-		Collection<Artifact> artifactDependencies = new ArrayList<Artifact>();
 		Artifact artifact = getArtifactForStorageItem(item);
 		if (artifact != null) {
-			DefaultServiceLocator locator = new DefaultServiceLocator();
-			locator.addService(RepositoryConnectorFactory.class,
-					FileRepositoryConnectorFactory.class);
-
-			RepositorySystem system = locator
-					.getService(RepositorySystem.class);
-
-			MavenRepositorySystemSession session = new MavenRepositorySystemSession();
-
-			// TODO: see if there's a way to implement a local repo manager that
-			// doesn't bother writing anything to disk.
-			LocalRepository localRepo = new LocalRepository("target/local-repo");
-			session.setLocalRepositoryManager(system
-					.newLocalRepositoryManager(localRepo));
-
-			ArtifactDescriptorRequest descriptorRequest = new ArtifactDescriptorRequest();
-			descriptorRequest.setArtifact(new DefaultArtifact(artifact
-					.toString()));
-			for (Repository repo : getRepositoryRegistry().getRepositories()) {
-				if (repo.getLocalUrl() != null) {
-					descriptorRequest.addRepository(new RemoteRepository(repo
-							.getId(),
-					// TODO: figure out what options there are for the 'type'
-					// param
-							"default", repo.getLocalUrl()));
-				}
-			}
-
-			ArtifactDescriptorResult descriptorResult = system
-					.readArtifactDescriptor(session, descriptorRequest);
-
-			for (org.sonatype.aether.graph.Dependency dependency : descriptorResult
-					.getDependencies()) {
-				if (getLogger().isDebugEnabled()) {
-					getLogger().debug(
-							artifact.getArtifactId() + " depends on "
-									+ dependency.getArtifact().getGroupId()
-									+ ":"
-									+ dependency.getArtifact().getArtifactId()
-									+ ":"
-									+ dependency.getArtifact().getVersion());
-				}
-				artifactDependencies.add(new Artifact(dependency.getArtifact()
-						.getGroupId(),
-						dependency.getArtifact().getArtifactId(), dependency
-								.getArtifact().getVersion()));
-			}
-
-			dependencyStore.addDependee(artifact, artifactDependencies);
+			dependencyStore.addDependee(artifact,
+					dependencyResolver.resolveDependencies(artifact));
 		}
 	}
 
@@ -209,7 +145,6 @@ public class DefaultReverseDependencyCalculator extends AbstractLogEnabled
 							+ item.getRepositoryItemUid().getPath());
 		}
 
-		InputStream input = item.getContentLocator().getContent();
 		Artifact artifact = getArtifactForStorageItem(item);
 		if (artifact != null) {
 			dependencyStore.removeDependee(artifact);
@@ -243,11 +178,11 @@ public class DefaultReverseDependencyCalculator extends AbstractLogEnabled
 
 	private class ReverseDependencyCalculationWalkerProcessor extends
 			AbstractWalkerProcessor {
-		private final MavenRepository repository;
+		private final GavCalculator gavCalculator;
 
 		public ReverseDependencyCalculationWalkerProcessor(
-				MavenRepository repository) {
-			this.repository = repository;
+				GavCalculator gavCalculator) {
+			this.gavCalculator = gavCalculator;
 		}
 
 		@Override
@@ -258,16 +193,13 @@ public class DefaultReverseDependencyCalculator extends AbstractLogEnabled
 					&& !item.getRepositoryItemUid().getPath().endsWith(".pom")) {
 				return;
 			}
-			Gav gav = this.repository.getGavCalculator().pathToGav(
-					item.getPath());
+			Gav gav = this.gavCalculator.pathToGav(item.getPath());
 
-			if (gav != null) {
-				// make sure we've really got a POM file
-				if (!gav.isHash() && !gav.isSignature()
-						&& gav.getExtension().equals("pom")) {
-					// and then calculate the reverse dependencies
-					calculateReverseDependencies((StorageFileItem) item);
-				}
+			// make sure we've really got a POM file
+			if (gav != null && !gav.isHash() && !gav.isSignature()
+					&& gav.getExtension().equals("pom")) {
+				// and then calculate the reverse dependencies
+				calculateReverseDependencies((StorageFileItem) item);
 			}
 		}
 	}
