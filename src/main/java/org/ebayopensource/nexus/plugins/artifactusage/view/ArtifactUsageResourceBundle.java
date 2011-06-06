@@ -21,10 +21,9 @@ public class ArtifactUsageResourceBundle extends AbstractNexusResourceBundle {
 	public List<StaticResource> getContributedResouces() {
 		List<StaticResource> result = new ArrayList<StaticResource>();
 
-		DefaultStaticResource resource = new DefaultStaticResource(
-				getClass().getResource(
-						"/static/js/nexus-plugin-artifact-usage-plugin-all.js"),
-				"/js/repoServer/nexus-plugin-artifact-usage-plugin-all.js",
+		DefaultStaticResource resource = new DefaultStaticResource(getClass()
+				.getResource("/static/js/nexus-artifact-usage-plugin-all.js"),
+				"/js/repoServer/nexus-artifact-usage-plugin-all.js",
 				"application/x-javascript");
 		result.add(resource);
 

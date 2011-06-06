@@ -20,7 +20,7 @@ public class ArtifactUsageIndexHtmlCustomizer extends
 	public String getPostHeadContribution(Map<String, Object> ctx) {
 		String version = getVersionFromJarFile("/META-INF/maven/com.paypal.nexus/artifact-usage-plugin/pom.properties");
 
-		return "<script src=\"js/repoServer/nexus-plugin-artifact-usage-plugin-all.js"
+		return "<script src=\"js/repoServer/nexus-artifact-usage-plugin-all.js"
 				+ (version == null ? "" : "?" + version)
 				+ "\" type=\"text/javascript\" charset=\"utf-8\"></script>";
 	}
