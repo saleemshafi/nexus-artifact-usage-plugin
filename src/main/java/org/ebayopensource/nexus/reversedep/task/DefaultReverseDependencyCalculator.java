@@ -116,8 +116,8 @@ public class DefaultReverseDependencyCalculator extends AbstractLogEnabled
 
 	public void calculateReverseDependencies(StorageFileItem item)
 			throws IOException {
-		if (getLogger().isInfoEnabled()) {
-			getLogger().info(
+		if (getLogger().isDebugEnabled()) {
+			getLogger().debug(
 					"Calculating reverse dependencies for "
 							+ item.getRepositoryItemUid().getPath());
 		}
@@ -139,8 +139,8 @@ public class DefaultReverseDependencyCalculator extends AbstractLogEnabled
 
 	public void removeReverseDependencies(StorageFileItem item)
 			throws IOException {
-		if (getLogger().isInfoEnabled()) {
-			getLogger().info(
+		if (getLogger().isDebugEnabled()) {
+			getLogger().debug(
 					"Removing reverse dependencies for "
 							+ item.getRepositoryItemUid().getPath());
 		}
