@@ -4,12 +4,10 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>org.ebayopensource.nexus.reversedep</groupId>
-	<artifactId>reverse-dependency-plugin</artifactId>
+	<groupId>org.ebayopensource.nexus.plugins</groupId>
+	<artifactId>artifact-usage-plugin</artifactId>
 	<version>${this-version}</version>
     <packaging>nexus-plugin</packaging>
-	<name>Ebay : Reverse Dependency Plugin</name>
-	<description>Adds reverse dependency visibility to locally stored artifacts</description>
 
 	<properties>
 		<this-version>1.0</this-version>

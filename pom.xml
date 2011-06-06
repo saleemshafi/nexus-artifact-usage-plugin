@@ -4,12 +4,13 @@
 
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>org.ebayopensource.nexus.reversedep</groupId>
-	<artifactId>reverse-dependency-plugin</artifactId>
+	<groupId>org.ebayopensource.nexus.plugins</groupId>
+	<artifactId>artifact-usage-plugin</artifactId>
 	<version>1.0-SNAPSHOT</version>
     <packaging>nexus-plugin</packaging>
-	<name>Ebay : Reverse Dependency Plugin</name>
-	<description>Adds reverse dependency visibility to locally stored artifacts</description>
+	<name>Ebay : Nexus Artifact Usage Plugin</name>
+	<description>Nexus plugin that provides visibility into how a particular artifact 
+	in the repository is used by other artifacts in the repository.</description>
 
 	<properties>
 		<!-- Set the Nexus version here, against which you build the plugin -->
@@ -17,6 +18,7 @@
 	    <aetherVersion>1.8.1</aetherVersion>
 	    <mavenVersion>3.0.1</mavenVersion>
 	    <wagonVersion>1.0-beta-7</wagonVersion>
+	    <nexusPluginRepo>/etc/nexus-oss-webapp-1.9.1.1-bundle/nexus-oss-webapp-1.9.1.1/runtime/apps/nexus/plugin-repository</nexusPluginRepo>
 	</properties>
 
 	<dependencies>
@@ -229,9 +231,9 @@
 		            <phase>install</phase>
 		            <configuration>
 		              <target>
-		                <delete dir="/etc/nexus-oss-webapp-1.9.1.1-bundle/nexus-oss-webapp-1.9.1.1/runtime/apps/nexus/plugin-repository/${project.artifactId}-${project.version}" />
+		                <delete dir="${nexusPluginRepo}/${project.artifactId}-${project.version}" />
 		              	<unzip src="target/${project.artifactId}-${project.version}-bundle.zip"
-		              			dest="/etc/nexus-oss-webapp-1.9.1.1-bundle/nexus-oss-webapp-1.9.1.1/runtime/apps/nexus/plugin-repository" />
+		              			dest="${nexusPluginRepo}" />
 		              </target>
 		            </configuration>
 		            <goals>
