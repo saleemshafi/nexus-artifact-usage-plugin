@@ -238,7 +238,7 @@ Ext
 					},
 					
 					downloadUsageTree : function(button, e) {
-						Sonatype.utils.openWindow("/nexus/service/local/usageGraph/"+this.root.text+".json");
+						Sonatype.utils.openWindow("/nexus/service/local/usageGraph/"+this.root.text+".xml");
 					},
 
 					startSearch : function(p) {
