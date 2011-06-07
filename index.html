@@ -2,8 +2,8 @@
 <html>
 <head>
 <style>
-html { background: 'images/handmadepaper.png'; }
-body { width: 600px; background: white; border: 0 1px solid black; font-family: helvetica; }
+html { background: url('images/handmadepaper.png'); }
+body { width: 800px; background: white; border-right: 1px solid black; border-left: 1px solid black; margin: 0 auto 0 auto; padding: 10px; font-family: helvetica; }
 
 </style>
 </head>
@@ -13,7 +13,7 @@ body { width: 600px; background: white; border: 0 1px solid black; font-family: 
 <p>The nexus-artifact-usage-plugin provides visibility into how a particular artifact is used within your Nexus repo.  It tracks what artifacts in your
 repo have dependencies to the artifact in question and allows you to walk that dependency tree in reverse.</p>
 <h2>Installation</h2>
-<p>Simply download the <a href="">latest stable release bundle</a> and drop it into your <pre>plugin-repository</pre> folder.  The next time you start
+<p>Simply download the <a href="">latest stable release bundle</a> and drop it into your "plugin-repository" folder.  The next time you start
 Nexus, you should notice a new tab when selecting an artifact called "Artifact Usage".</p>
 <h2>Setup</h2>
 <p>That tab will essentially be empty until you create a task that will automatically calculate the artifact usage data for you.  This is because Nexus
