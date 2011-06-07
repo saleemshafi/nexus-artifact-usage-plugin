@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<body>
+<h1>Nexus Artifact Usage Plugin</h1>
+<h2>Summary</h2>
+<p>The nexus-artifact-usage-plugin provides visibility into how a particular artifact is used within your Nexus repo.  It tracks what artifacts in your
+repo have dependencies to the artifact in question and allows you to walk that dependency tree in reverse.</p>
+<h2>Installation</h2>
+<p>Simply download the <a href="">latest stable release bundle</a> and drop it into your <pre>plugin-repository</pre> folder.  The next time you start
+Nexus, you should notice a new tab when selecting an artifact called "Artifact Usage".</p>
+<h2>Setup</h2>
+<p>That tab will essentially be empty until you create a task that will automatically calculate the artifact usage data for you.  This is because Nexus
+doesn't inherently track this information, so we have to crawl through the repository to get that data.  By going to the "Scheduled Tasks" section of
+Nexus, you can create a new task of type "Recalculate Artifact Usage" for all of the repositories and just set the recurrence to "Manual".</p>
+<p>Once you do this, the processing should automatically start without you even having to run it.  Keeping this task around will also automatically
+trigger a calculation of the artifact usage whenever you restart Nexus.</p>
+<h2>Usage</h2>
+<p>The plugin also recognizes whenever a new artifact gets into the repository (either because of a cache dependency resolution or getting deployed into
+the repository) or an artifact gets deleted and automatically updates the artifact usage information.  However, if you ever feel like the data might
+not be up-to-date, you can always run the manual scheduled task you created earlier.</p>
+<p>Now, when you click on a particular artifact in a repository and navigate to the Artifact Usage tab, you should see a tree of artifact that use the
+artifact you've selected.  You can drill into this to get a full usage tree, or you can click the "Download" button to download a file that contains
+the full tree of artifacts.</p>
+<h2>What's Next</h2>
+<p>There's plenty more to do to make this even easier to work with, and you can track those new features on the <a 
+href="https://github.com/saleemshafi/nexus-artifact-usage-plugin/issues">GitHub Issues page</a>.
+</body>
+</html>
