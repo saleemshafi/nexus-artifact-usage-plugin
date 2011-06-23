@@ -44,7 +44,7 @@ public class InMemoryArtifactUsageStore extends AbstractLogEnabled implements
 			ArtifactUser user = new ArtifactUser(artifactUser.getGroupId(),
 					artifactUser.getArtifactId(), artifactUser.getVersion(),
 					artifactUser.getPath());
-			for (ArtifactUser transitiveUser : getArtifactUsersTransitively(artifact)) {
+			for (ArtifactUser transitiveUser : getArtifactUsersTransitively(artifactUser)) {
 				user.addArtifactUser(transitiveUser);
 			}
 			artifactUsers.add(user);

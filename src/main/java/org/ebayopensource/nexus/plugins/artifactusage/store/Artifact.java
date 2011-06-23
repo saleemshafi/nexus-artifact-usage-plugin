@@ -33,6 +33,8 @@ public class Artifact {
 		this.groupId = gavPieces[0];
 		this.artifactId = gavPieces[1];
 		this.version = gavPieces[2];
+
+		this.text = this.groupId + ":" + this.artifactId + ":" + this.version;
 	}
 
 	public String getGroupId() {

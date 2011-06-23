@@ -81,4 +81,8 @@ public class ArtifactUsageEventInspector extends AbstractEventInspector {
 			calculator.calculateArtifactUsage((StorageFileItem) item);
 		}
 	}
+
+	void setArtifactUsageCalculator(ArtifactUsageCalculator calculator) {
+		this.calculator = calculator;
+	}
 }

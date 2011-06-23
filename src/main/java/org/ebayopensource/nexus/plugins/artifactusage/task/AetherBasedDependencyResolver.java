@@ -10,6 +10,7 @@ import org.apache.maven.repository.internal.MavenRepositorySystemSession;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.AbstractLogEnabled;
+import org.codehaus.plexus.logging.Logger;
 import org.ebayopensource.nexus.plugins.artifactusage.store.Artifact;
 import org.sonatype.aether.RepositorySystem;
 import org.sonatype.aether.connector.file.FileRepositoryConnectorFactory;
@@ -36,6 +37,7 @@ public class AetherBasedDependencyResolver extends AbstractLogEnabled implements
 
 	private RepositorySystem repoSystem;
 	private MavenRepositorySystemSession session;
+	private File tempDirectory;
 
 	public Collection<Artifact> resolveDependencies(Artifact artifact)
 			throws IOException {
@@ -77,14 +79,33 @@ public class AetherBasedDependencyResolver extends AbstractLogEnabled implements
 		return artifactDependencies;
 	}
 
+	void setTempDirectory(File tempDirectory) {
+		this.tempDirectory = tempDirectory;
+	}
+
+	void setRepositoryRegistry(RepositoryRegistry registry) {
+		this.repositoryRegistry = registry;
+	}
+
+	void setupLogger(Logger logger) {
+		this.setupLogger(this, logger);
+	}
+
+	private File getTempDirectory() {
+		if (this.tempDirectory == null) {
+			this.tempDirectory = new File(
+					this.nexusConfig.getTemporaryDirectory(),
+					"artifact-usage-repo");
+		}
+		return this.tempDirectory;
+	}
+
 	// i'm not sure we really need to synchronize this
 	private MavenRepositorySystemSession getRepositorySession() {
 		session = new MavenRepositorySystemSession();
 		// TODO: see if there's a way to implement a local repo manager that
 		// doesn't bother writing anything to disk.
-		LocalRepository localRepo = new LocalRepository(
-				new File(this.nexusConfig.getTemporaryDirectory(),
-						"artifact-usage-repo"));
+		LocalRepository localRepo = new LocalRepository(this.getTempDirectory());
 		this.session.setLocalRepositoryManager(this.getRepositorySystem()
 				.newLocalRepositoryManager(localRepo));
 		return this.session;
