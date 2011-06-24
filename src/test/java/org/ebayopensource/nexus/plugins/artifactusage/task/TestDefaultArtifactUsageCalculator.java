@@ -4,19 +4,19 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.ebayopensource.nexus.plugins.artifactusage.store.Artifact;
+import org.ebayopensource.nexus.plugins.artifactusage.store.GAV;
 import org.mockito.Mockito;
 import org.sonatype.nexus.AbstractNexusTestCase;
 import org.sonatype.nexus.proxy.item.RepositoryItemUid;
 import org.sonatype.nexus.proxy.item.StorageFileItem;
 
 public class TestDefaultArtifactUsageCalculator extends AbstractNexusTestCase {
-	void testCalculateArtifactUsageForRepository() throws Exception {
+	public void testCalculateArtifactUsageForRepository() throws Exception {
 		DefaultArtifactUsageCalculator calculator = getCalculator();
 		// calculator.calculateArtifactUsage(repository);
 	}
 
-	void testCalculateArtifactUsageOfArtifact() throws Exception {
+	public void testCalculateArtifactUsageOfArtifact() throws Exception {
 		DefaultArtifactUsageCalculator calculator = getCalculator();
 		// calculator.calculateArtifactUsage(item);
 	}
@@ -29,7 +29,7 @@ public class TestDefaultArtifactUsageCalculator extends AbstractNexusTestCase {
 	public void testGetGavFromSimplePom() throws Exception {
 		StorageFileItem pomFileItem = getMockStorageFileItem("src/test/remote-repo/test/artifactusage/simple-artifact/1.0/simple-artifact-1.0.pom");
 
-		Artifact artifact = ((DefaultArtifactUsageCalculator) this
+		GAV artifact = ((DefaultArtifactUsageCalculator) this
 				.lookup(ArtifactUsageCalculator.class))
 				.getArtifactForStorageItem(pomFileItem);
 		assertNotNull(artifact);
@@ -41,7 +41,7 @@ public class TestDefaultArtifactUsageCalculator extends AbstractNexusTestCase {
 	public void testGetGavFromPomWithParent() throws Exception {
 		StorageFileItem pomFileItem = getMockStorageFileItem("src/test/remote-repo/test/artifactusage/artifact-with-parent/1.0/artifact-with-parent-1.0.pom");
 
-		Artifact artifact = ((DefaultArtifactUsageCalculator) this
+		GAV artifact = ((DefaultArtifactUsageCalculator) this
 				.lookup(ArtifactUsageCalculator.class))
 				.getArtifactForStorageItem(pomFileItem);
 		assertNotNull(artifact);
@@ -54,7 +54,7 @@ public class TestDefaultArtifactUsageCalculator extends AbstractNexusTestCase {
 	public void testGetGavFromPomWithProperties() throws Exception {
 		StorageFileItem pomFileItem = getMockStorageFileItem("src/test/remote-repo/test/artifactusage/artifact-with-properties/1.0/artifact-with-properties-1.0.pom");
 
-		Artifact artifact = ((DefaultArtifactUsageCalculator) this
+		GAV artifact = ((DefaultArtifactUsageCalculator) this
 				.lookup(ArtifactUsageCalculator.class))
 				.getArtifactForStorageItem(pomFileItem);
 		assertNotNull(artifact);

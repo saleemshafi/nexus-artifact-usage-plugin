@@ -7,8 +7,8 @@ import org.apache.maven.index.artifact.GavCalculator;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.AbstractLogEnabled;
-import org.ebayopensource.nexus.plugins.artifactusage.store.Artifact;
 import org.ebayopensource.nexus.plugins.artifactusage.store.ArtifactUsageStore;
+import org.ebayopensource.nexus.plugins.artifactusage.store.GAV;
 import org.sonatype.nexus.configuration.application.NexusConfiguration;
 import org.sonatype.nexus.proxy.NoSuchRepositoryException;
 import org.sonatype.nexus.proxy.ResourceStoreRequest;
@@ -129,10 +129,11 @@ public class DefaultArtifactUsageCalculator extends AbstractLogEnabled
 		}
 
 		// convert to a Maven project
-		Artifact artifact = getArtifactForStorageItem(item);
+		GAV artifact = getArtifactForStorageItem(item);
 		if (artifact != null) {
-			artifactUsageStore.addDependencies(artifact,
-					dependencyResolver.resolveDependencies(artifact));
+			artifactUsageStore.addDependencies(artifact, dependencyResolver
+					.resolveDependencies(artifact), item.getRepositoryItemUid()
+					.getPath());
 		}
 	}
 
@@ -143,7 +144,7 @@ public class DefaultArtifactUsageCalculator extends AbstractLogEnabled
 							+ item.getRepositoryItemUid().getPath());
 		}
 
-		Artifact artifact = getArtifactForStorageItem(item);
+		GAV artifact = getArtifactForStorageItem(item);
 		if (artifact != null) {
 			artifactUsageStore.removeArtifact(artifact);
 		}
@@ -157,14 +158,13 @@ public class DefaultArtifactUsageCalculator extends AbstractLogEnabled
 	 * @return an Artifact containing the GAV information in the file
 	 * @throws IOException
 	 */
-	Artifact getArtifactForStorageItem(StorageFileItem item) throws IOException {
+	GAV getArtifactForStorageItem(StorageFileItem item) throws IOException {
 		try {
 			PomArtifactManager mgr = new PomArtifactManager(
 					this.nexusConfig.getTemporaryDirectory());
 			mgr.storeTempPomFile(item.getInputStream());
 			ArtifactCoordinate ac = mgr.getArtifactCoordinateFromTempPomFile();
-			return new Artifact(ac.getGroupId(), ac.getArtifactId(),
-					ac.getVersion(), item.getRepositoryItemUid().getPath());
+			return new GAV(ac.getGroupId(), ac.getArtifactId(), ac.getVersion());
 		} catch (Exception e) {
 			getLogger().error(
 					"Error processing POM file for artifact usage data.", e);

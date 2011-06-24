@@ -3,19 +3,16 @@ package org.ebayopensource.nexus.plugins.artifactusage.store;
 import java.util.Collection;
 import java.util.HashSet;
 
-import javax.xml.bind.annotation.XmlType;
-
-@XmlType(name = "node")
 public class DependencyList {
-	private Collection<Artifact> dependencies = new HashSet<Artifact>();
+	private Collection<GAV> dependencies = new HashSet<GAV>();
 	private long lastCalculated;
 
-	public DependencyList(Collection<Artifact> dependencies) {
+	public DependencyList(Collection<GAV> dependencies) {
 		this.dependencies = dependencies;
 		this.lastCalculated = System.currentTimeMillis();
 	}
 
-	public Collection<Artifact> getDependencies() {
+	public Collection<GAV> getDependencies() {
 		return this.dependencies;
 	}
 

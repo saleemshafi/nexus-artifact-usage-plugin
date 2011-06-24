@@ -11,16 +11,6 @@ import java.util.Collection;
  */
 public interface ArtifactUsageStore {
 	/**
-	 * Returns a list of artifacts that use the given artifact.
-	 * 
-	 * @param artifact
-	 *            the Artifact that is being used
-	 * @return list of artifacts that use the given artifact, e.g. as a
-	 *         dependency
-	 */
-	Collection<Artifact> getArtifactUsers(Artifact artifact);
-
-	/**
 	 * Returns a list of artifacts that use the given artifact, and each
 	 * artifact returned also has a list of its users, etc., until it hits the
 	 * leaf nodes.
@@ -30,7 +20,7 @@ public interface ArtifactUsageStore {
 	 * @return list of artifacts that use the given artifact, e.g. as a
 	 *         dependency, filled out transitively
 	 */
-	Collection<ArtifactUser> getArtifactUsersTransitively(Artifact dependency);
+	Collection<ArtifactUser> getArtifactUsers(GAV dependency);
 
 	/**
 	 * Marks the first Artifact argument as a project that depends on the
@@ -41,7 +31,8 @@ public interface ArtifactUsageStore {
 	 * @param dependencies
 	 *            The artifacts that are depended upon
 	 */
-	void addDependencies(Artifact artifact, Collection<Artifact> dependencies);
+	void addDependencies(GAV artifact, Collection<GAV> dependencies,
+			String artifactPath);
 
 	/**
 	 * Remove any mappings to this artifact from the store.
@@ -49,7 +40,7 @@ public interface ArtifactUsageStore {
 	 * @param artifact
 	 *            The artifact being removed from the repository
 	 */
-	void removeArtifact(Artifact artifact);
+	void removeArtifact(GAV artifact);
 
 	/**
 	 * Returns whether or not the artifact at the given path has already been

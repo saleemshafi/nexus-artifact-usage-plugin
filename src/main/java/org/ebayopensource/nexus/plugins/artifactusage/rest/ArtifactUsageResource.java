@@ -2,24 +2,22 @@ package org.ebayopensource.nexus.plugins.artifactusage.rest;
 
 import java.util.Collection;
 
-import javax.ws.rs.Consumes;
-import javax.ws.rs.Produces;
-
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
-import org.ebayopensource.nexus.plugins.artifactusage.store.Artifact;
 import org.ebayopensource.nexus.plugins.artifactusage.store.ArtifactUsageStore;
+import org.ebayopensource.nexus.plugins.artifactusage.store.ArtifactUser;
+import org.ebayopensource.nexus.plugins.artifactusage.store.GAV;
 import org.restlet.Context;
+import org.restlet.data.MediaType;
 import org.restlet.data.Request;
 import org.restlet.data.Response;
 import org.restlet.resource.ResourceException;
+import org.restlet.resource.StringRepresentation;
 import org.restlet.resource.Variant;
 import org.sonatype.nexus.rest.AbstractNexusPlexusResource;
 import org.sonatype.plexus.rest.resource.PathProtectionDescriptor;
 import org.sonatype.plexus.rest.resource.PlexusResource;
 
-@Produces({ "application/xml", "application/json" })
-@Consumes({ "application/xml", "application/json" })
 @Component(role = PlexusResource.class, hint = "org.ebayopensource.nexus.plugins.artifactusage.rest.ArtifactUsageResource")
 public class ArtifactUsageResource extends AbstractNexusPlexusResource {
 	@Requirement(hint = "InMemory")
@@ -38,17 +36,14 @@ public class ArtifactUsageResource extends AbstractNexusPlexusResource {
 					"getting usage of "
 							+ request.getResourceRef().getLastSegment());
 		}
-		ArtifactUsageResourceResponse res = new ArtifactUsageResourceResponse();
-
-		// TODO: would love the ability to get multiple levels in one request,
-		// perhaps even the whole tree
-		Collection<Artifact> artifactList = artifactUsageStore
-				.getArtifactUsers(new Artifact(request.getResourceRef()
+		Collection<ArtifactUser> artifactList = artifactUsageStore
+				.getArtifactUsers(new GAV(request.getResourceRef()
 						.getLastSegment()));
-		for (Artifact artifact : artifactList) {
-			res.addArtifact(artifact);
-		}
-		return res;
+		// limiting depth of the data to n levels so that we don't stall out
+		String jsonText = "{" + ArtifactUsageSerializer.toJson(artifactList, 5)
+				+ "}";
+
+		return new StringRepresentation(jsonText, MediaType.APPLICATION_JSON);
 	}
 
 	@Override
@@ -60,5 +55,4 @@ public class ArtifactUsageResource extends AbstractNexusPlexusResource {
 	public Object getPayloadInstance() {
 		return null;
 	}
-
 }

@@ -64,7 +64,7 @@ Sonatype.repoServer.ArtifactUsagePanel = function(config) {
 								},
 								' ',
 								{
-									text : 'Full Usage Tree',
+									text : 'Download Tree As XML',
 									icon : Sonatype.config.resourcePath
 											+ '/images/icons/page_white_put.png',
 									cls : 'x-btn-text-icon',

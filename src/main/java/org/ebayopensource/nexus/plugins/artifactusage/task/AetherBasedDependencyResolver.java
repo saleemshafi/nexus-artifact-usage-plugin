@@ -11,7 +11,7 @@ import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.AbstractLogEnabled;
 import org.codehaus.plexus.logging.Logger;
-import org.ebayopensource.nexus.plugins.artifactusage.store.Artifact;
+import org.ebayopensource.nexus.plugins.artifactusage.store.GAV;
 import org.sonatype.aether.RepositorySystem;
 import org.sonatype.aether.connector.file.FileRepositoryConnectorFactory;
 import org.sonatype.aether.repository.LocalRepository;
@@ -39,9 +39,8 @@ public class AetherBasedDependencyResolver extends AbstractLogEnabled implements
 	private MavenRepositorySystemSession session;
 	private File tempDirectory;
 
-	public Collection<Artifact> resolveDependencies(Artifact artifact)
-			throws IOException {
-		Collection<Artifact> artifactDependencies = new ArrayList<Artifact>();
+	public Collection<GAV> resolveDependencies(GAV artifact) throws IOException {
+		Collection<GAV> artifactDependencies = new ArrayList<GAV>();
 
 		ArtifactDescriptorRequest descriptorRequest = new ArtifactDescriptorRequest();
 		descriptorRequest.setArtifact(new DefaultArtifact(artifact.toString()));
@@ -67,7 +66,7 @@ public class AetherBasedDependencyResolver extends AbstractLogEnabled implements
 									+ ":"
 									+ dependency.getArtifact().getVersion());
 				}
-				artifactDependencies.add(new Artifact(dependency.getArtifact()
+				artifactDependencies.add(new GAV(dependency.getArtifact()
 						.getGroupId(),
 						dependency.getArtifact().getArtifactId(), dependency
 								.getArtifact().getVersion()));
@@ -83,7 +82,7 @@ public class AetherBasedDependencyResolver extends AbstractLogEnabled implements
 		this.tempDirectory = tempDirectory;
 	}
 
-	void setRepositoryRegistry(RepositoryRegistry registry) {
+	void setRepo(RepositoryRegistry registry) {
 		this.repositoryRegistry = registry;
 	}
 

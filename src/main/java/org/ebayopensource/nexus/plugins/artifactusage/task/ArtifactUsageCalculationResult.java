@@ -3,7 +3,7 @@ package org.ebayopensource.nexus.plugins.artifactusage.task;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.ebayopensource.nexus.plugins.artifactusage.store.Artifact;
+import org.ebayopensource.nexus.plugins.artifactusage.store.GAV;
 
 /**
  * The result of calculating the usage of a number of artifacts.
@@ -12,9 +12,9 @@ import org.ebayopensource.nexus.plugins.artifactusage.store.Artifact;
  */
 public class ArtifactUsageCalculationResult {
 	private boolean successful = true;
-	private Collection<Artifact> updatedArtifacts = new ArrayList<Artifact>();
+	private Collection<GAV> updatedArtifacts = new ArrayList<GAV>();
 
-	public Collection<Artifact> getUpdatedArtifacts() {
+	public Collection<GAV> getUpdatedArtifacts() {
 		return this.updatedArtifacts;
 	}
 

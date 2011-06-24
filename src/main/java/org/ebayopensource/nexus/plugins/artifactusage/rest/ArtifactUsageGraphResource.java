@@ -3,25 +3,27 @@ package org.ebayopensource.nexus.plugins.artifactusage.rest;
 import java.util.Collection;
 
 import javax.ws.rs.Produces;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
-import org.ebayopensource.nexus.plugins.artifactusage.store.Artifact;
 import org.ebayopensource.nexus.plugins.artifactusage.store.ArtifactUsageStore;
 import org.ebayopensource.nexus.plugins.artifactusage.store.ArtifactUser;
+import org.ebayopensource.nexus.plugins.artifactusage.store.GAV;
 import org.restlet.Context;
 import org.restlet.data.MediaType;
 import org.restlet.data.Request;
 import org.restlet.data.Response;
+import org.restlet.resource.DomRepresentation;
 import org.restlet.resource.ResourceException;
+import org.restlet.resource.StringRepresentation;
 import org.restlet.resource.Variant;
 import org.sonatype.nexus.rest.AbstractNexusPlexusResource;
-import org.sonatype.plexus.rest.PlexusRestletApplicationBridge;
-import org.sonatype.plexus.rest.representation.XStreamRepresentation;
 import org.sonatype.plexus.rest.resource.PathProtectionDescriptor;
 import org.sonatype.plexus.rest.resource.PlexusResource;
-
-import com.thoughtworks.xstream.XStream;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
 // TODO: Consider re-implementing this as a view provider and display full usage tree at once (no Ajax tree building)
 @Produces({ "application/xml", "application/json" })
@@ -43,8 +45,6 @@ public class ArtifactUsageGraphResource extends AbstractNexusPlexusResource {
 					"getting usage of "
 							+ request.getResourceRef().getLastSegment());
 		}
-		ArtifactUsageGraphResourceResponse res = new ArtifactUsageGraphResourceResponse();
-
 		// Figure out the requested content type for the data
 		String artifactGav = request.getResourceRef().getLastSegment();
 		String type = "xml";
@@ -55,24 +55,29 @@ public class ArtifactUsageGraphResource extends AbstractNexusPlexusResource {
 			artifactGav = artifactGav.substring(0, artifactGav.length() - 4);
 		}
 
+		GAV gav = new GAV(artifactGav);
 		Collection<ArtifactUser> artifactUsers = artifactUsageStore
-				.getArtifactUsersTransitively(new Artifact(artifactGav));
-		for (ArtifactUser user : artifactUsers) {
-			res.addArtifactUser(user);
-		}
+				.getArtifactUsers(gav);
 
 		// if the client wanted JSON, setup the appropriate Representation
 		if ("json".equals(type)) {
-			XStream xstream = (XStream) context.getAttributes().get(
-					PlexusRestletApplicationBridge.JSON_XSTREAM);
-			XStreamRepresentation rep = new XStreamRepresentation(xstream, "",
+			String jsonText = "{"
+					+ ArtifactUsageSerializer.toJson(artifactUsers, 3) + "}";
+			return new StringRepresentation(jsonText,
 					MediaType.APPLICATION_JSON);
-			rep.setPayload(res);
-			rep.setMediaType(MediaType.APPLICATION_JSON);
-			return rep;
 		} else {
-			// default is XML, so no need to wrap it in a Representation
-			return res;
+			Document doc;
+			try {
+				doc = DocumentBuilderFactory.newInstance().newDocumentBuilder()
+						.newDocument();
+				Element rootElement = ArtifactUsageSerializer.toXml(gav, doc);
+				doc.appendChild(rootElement);
+				// default is XML, so no need to wrap it in a Representation
+				ArtifactUsageSerializer.toXml(artifactUsers, doc, rootElement);
+				return new DomRepresentation(MediaType.APPLICATION_XML, doc);
+			} catch (ParserConfigurationException e) {
+				throw new ResourceException(e);
+			}
 		}
 	}
 

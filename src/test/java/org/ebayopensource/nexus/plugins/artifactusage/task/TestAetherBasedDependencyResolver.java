@@ -9,7 +9,7 @@ import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import org.codehaus.plexus.logging.Logger;
-import org.ebayopensource.nexus.plugins.artifactusage.store.Artifact;
+import org.ebayopensource.nexus.plugins.artifactusage.store.GAV;
 import org.junit.Test;
 import org.mockito.Mockito;
 import org.sonatype.nexus.proxy.registry.RepositoryRegistry;
@@ -19,9 +19,9 @@ public class TestAetherBasedDependencyResolver extends TestCase {
 	@Test
 	public void testResolveDependenciesForSimpleProject() throws Exception {
 		AetherBasedDependencyResolver resolver = setupResolver();
-		Artifact simpleArtifact = new Artifact("test.artifactusage",
-				"simple-artifact", "1.0");
-		Collection<Artifact> dependencies = resolver
+		GAV simpleArtifact = new GAV("test.artifactusage", "simple-artifact",
+				"1.0");
+		Collection<GAV> dependencies = resolver
 				.resolveDependencies(simpleArtifact);
 
 		Assert.assertNotNull(dependencies);
@@ -39,7 +39,7 @@ public class TestAetherBasedDependencyResolver extends TestCase {
 		remoteRepos.add(testRemoteRepo);
 		Mockito.when(repoRegistry.getRepositories()).thenReturn(remoteRepos);
 		AetherBasedDependencyResolver resolver = new AetherBasedDependencyResolver();
-		resolver.setRepositoryRegistry(repoRegistry);
+		resolver.setRepo(repoRegistry);
 		resolver.setTempDirectory(new File("./target/test-repo/"));
 
 		Logger logger = Mockito.mock(Logger.class);

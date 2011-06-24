@@ -1,41 +1,10 @@
 package org.ebayopensource.nexus.plugins.artifactusage.store;
 
-import javax.xml.bind.annotation.XmlType;
-
-@XmlType(name = "node")
-public class Artifact {
-	private String groupId;
-	private String artifactId;
-	private String version;
-	private String path;
-	private String text;
-
-	public Artifact(String groupId, String artifactId, String version) {
-		this(groupId, artifactId, version, null);
-	}
-
-	public Artifact(String groupId, String artifactId, String version,
-			String path) {
-		this.groupId = groupId;
-		this.artifactId = artifactId;
-		this.version = version;
-		this.path = path;
-
-		this.text = groupId + ":" + artifactId + ":" + version;
-	}
-
-	public Artifact(String gav) {
-		String[] gavPieces = gav.split(":");
-		if (gavPieces.length != 3) {
-			throw new IllegalArgumentException(
-					"GAV parameter must be in the form <groupId>:<artifactId>:version");
-		}
-		this.groupId = gavPieces[0];
-		this.artifactId = gavPieces[1];
-		this.version = gavPieces[2];
-
-		this.text = this.groupId + ":" + this.artifactId + ":" + this.version;
-	}
+public class GAV {
+	private final String groupId;
+	private final String artifactId;
+	private final String version;
+	private final String name;
 
 	public String getGroupId() {
 		return groupId;
@@ -49,12 +18,27 @@ public class Artifact {
 		return version;
 	}
 
-	public String getPath() {
-		return path;
+	public GAV(String groupId, String artifactId, String version) {
+		this.groupId = groupId;
+		this.artifactId = artifactId;
+		this.version = version;
+		this.name = this.groupId + ":" + this.artifactId + ":" + this.version;
+	}
+
+	public GAV(String gav) {
+		String[] gavPieces = gav.split(":");
+		if (gavPieces.length != 3) {
+			throw new IllegalArgumentException(
+					"GAV parameter must be in the form <groupId>:<artifactId>:version");
+		}
+		this.groupId = gavPieces[0];
+		this.artifactId = gavPieces[1];
+		this.version = gavPieces[2];
+		this.name = this.groupId + ":" + this.artifactId + ":" + this.version;
 	}
 
 	public String toString() {
-		return this.text;
+		return this.name;
 	}
 
 	@Override
@@ -76,7 +60,7 @@ public class Artifact {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		Artifact other = (Artifact) obj;
+		GAV other = (GAV) obj;
 		if (artifactId == null) {
 			if (other.artifactId != null)
 				return false;
@@ -94,5 +78,4 @@ public class Artifact {
 			return false;
 		return true;
 	}
-
 }
