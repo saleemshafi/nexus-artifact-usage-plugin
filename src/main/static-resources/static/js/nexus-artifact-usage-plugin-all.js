@@ -36,87 +36,87 @@ Sonatype.repoServer.ArtifactUsagePanel = function(config) {
 	var config = config || {};
 	var defaultConfig = {};
 	Ext.apply(this, config, defaultConfig);
-	
+
 	this.oldSearchText = '';
-	this.searchTask = new Ext.util.DelayedTask( this.startSearch, this, [this]);
-	
-	Sonatype.repoServer.ArtifactUsagePanel.superclass.constructor
-			.call(
-					this,
-					{
-						title : 'Artifact Usage',
-						anchor : '0 -2',
-						bodyStyle : 'background-color:#FFFFFF',
-						animate : true,
-						lines : false,
-						autoScroll : true,
-						containerScroll : true,
-						rootVisible : true,
-						enableDD : false,
-						tbar : [
-								{
-									text : 'Refresh',
-									icon : Sonatype.config.resourcePath
-											+ '/images/icons/arrow_refresh.png',
-									cls : 'x-btn-text-icon',
-									scope : this,
-									handler : this.refreshHandler
-								},
-								' ',
-								{
-									text : 'Download Tree As XML',
-									icon : Sonatype.config.resourcePath
-											+ '/images/icons/page_white_put.png',
-									cls : 'x-btn-text-icon',
-									scope : this,
-									handler : this.downloadUsageTree
-								},
-								
-// TODO: need to be able to filter by scope, repository, dependencyType (dependency, plugin, reporting plugin)
-								' '
-// Commenting this out 'cause it doesn't quite work the way it ought to.  Not
-// sure that it even makes sense if the full tree isn't populated.
-//								, 'Path Lookup:',
-//								{
-//									xtype : 'nexussearchfield',
-//									searchPanel : this,
-//									width : 400,
-//									enableKeyEvents : true,
-//									listeners : {
-//										'keyup' : {
-//											fn : function(field, event) {
-//												var key = event.getKey();
-//												if (!event.isNavKeyPress()) {
-//													this.searchTask.delay(200);
-//												}
-//											},
-//											scope : this
-//										},
-//										'render' : function(c) {
-//											Ext.QuickTips
-//													.register({
-//														target : c.getEl(),
-//														text : 'Enter a complete path to lookup, for example org/sonatype/nexus'
-//													});
-//										}
-//									}
-//								}
-								],
-						loader : new Ext.tree.SonatypeTreeLoader({
-							url : '',
-							listeners : {
-								loadexception : this.treeLoadExceptionHandler,
-								scope : this
-							}
-						}),
-						listeners : {
-							click : this.nodeClickHandler,
-							// remove existing right-click menu
-							// contextMenu: this.nodeContextMenuHandler,
-							expandnode : this.indexBrowserExpandFollowup,
-							scope : this
-						}
-					});
+	this.searchTask = new Ext.util.DelayedTask(this.startSearch, this, [ this ]);
+
+	Sonatype.repoServer.ArtifactUsagePanel.superclass.constructor.call(this, {
+		title : 'Artifact Usage',
+		anchor : '0 -2',
+		bodyStyle : 'background-color:#FFFFFF',
+		animate : true,
+		lines : false,
+		autoScroll : true,
+		containerScroll : true,
+		rootVisible : true,
+		enableDD : false,
+		tbar : [
+				{
+					text : 'Refresh',
+					icon : Sonatype.config.resourcePath
+							+ '/images/icons/arrow_refresh.png',
+					cls : 'x-btn-text-icon',
+					scope : this,
+					handler : this.refreshHandler
+				},
+				' ',
+				{
+					text : 'Download Tree As XML',
+					icon : Sonatype.config.resourcePath
+							+ '/images/icons/page_white_put.png',
+					cls : 'x-btn-text-icon',
+					scope : this,
+					handler : this.downloadUsageTree
+				},
+
+				// TODO: need to be able to filter by scope, repository,
+				// dependencyType (dependency, plugin, reporting plugin)
+				' '
+		// Commenting this out 'cause it doesn't quite work the way it ought to.
+		// Not
+		// sure that it even makes sense if the full tree isn't populated.
+		// , 'Path Lookup:',
+		// {
+		// xtype : 'nexussearchfield',
+		// searchPanel : this,
+		// width : 400,
+		// enableKeyEvents : true,
+		// listeners : {
+		// 'keyup' : {
+		// fn : function(field, event) {
+		// var key = event.getKey();
+		// if (!event.isNavKeyPress()) {
+		// this.searchTask.delay(200);
+		// }
+		// },
+		// scope : this
+		// },
+		// 'render' : function(c) {
+		// Ext.QuickTips
+		// .register({
+		// target : c.getEl(),
+		// text : 'Enter a complete path to lookup, for example
+		// org/sonatype/nexus'
+		// });
+		// }
+		// }
+		// }
+		],
+		loader : new Ext.tree.SonatypeMultiLevelTreeLoader({
+			url : '',
+			listeners : {
+				loadexception : this.treeLoadExceptionHandler,
+				scope : this
+			}
+		}),
+		listeners : {
+			click : this.nodeClickHandler,
+			// remove existing right-click menu
+			// contextMenu: this.nodeContextMenuHandler,
+			expandnode : this.indexBrowserExpandFollowup,
+			scope : this
+		}
+	});
 
 	new Ext.tree.TreeSorter(this, {
 		folderSort : true
@@ -138,39 +138,44 @@ Ext
 				Ext.tree.TreePanel,
 				{
 					showArtifactUsageData : function(payload, artifactContainer) {
-				          Ext.Ajax.request({
-				                url : payload.resourceURI + '?describe=maven2&isLocal=true',
-				                callback : function(options, isSuccess, response) {
-				                  if (isSuccess)
-				                  {
-				                    var infoResp = Ext.decode(response.responseText);
-				                    this.showArtifactUsers(infoResp.data);
-				                  }
-				                  else
-				                  {
-				                    if (response.status = 404)
-				                    {
-				                      artifactContainer.hideTab(this);
-				                    }
-				                    else
-				                    {
-				                      Sonatype.utils.connectionError(response, 'Unable to retrieve Maven information.');
-				                    }
-				                  }
-				                },
-				                scope : this,
-				                method : 'GET',
-				                suppressStatus : '404'
-				              });
+						Ext.Ajax
+								.request({
+									url : payload.resourceURI
+											+ '?describe=maven2&isLocal=true',
+									callback : function(options, isSuccess,
+											response) {
+										if (isSuccess) {
+											var infoResp = Ext
+													.decode(response.responseText);
+											this
+													.showArtifactUsers(infoResp.data);
+										} else {
+											if (response.status = 404) {
+												artifactContainer.hideTab(this);
+											} else {
+												Sonatype.utils
+														.connectionError(
+																response,
+																'Unable to retrieve Maven information.');
+											}
+										}
+									},
+									scope : this,
+									method : 'GET',
+									suppressStatus : '404'
+								});
 					},
-					
+
 					showArtifactUsers : function(rootArtifact) {
 						this.rootArtifact = rootArtifact;
-						var gav = rootArtifact.groupId+":"+rootArtifact.artifactId+":"+rootArtifact.baseVersion;
+						var gav = rootArtifact.groupId + ":"
+								+ rootArtifact.artifactId + ":"
+								+ rootArtifact.baseVersion;
 						this.root.setText(gav);
 						this.root.attributes.localStorageUpdated = false;
 						this.root.attributes.expanded = false;
-						this.root.id = "/nexus/service/local/usage/"+this.root.text;
+						this.root.id = "/nexus/service/local/usage/"
+								+ this.root.text;
 						this.root.reload();
 					},
 
@@ -178,7 +183,7 @@ Ext
 						var urlBase = "/nexus/service/local/usage/";
 						for ( var j = 0; j < node.childNodes.length; j++) {
 							var childNode = node.childNodes[j];
-							childNode.id = urlBase+childNode.text;
+							childNode.id = urlBase + childNode.text;
 						}
 					},
 
@@ -236,9 +241,11 @@ Ext
 					refreshHandler : function(button, e) {
 						this.showArtifactUsers(this.rootArtifact);
 					},
-					
+
 					downloadUsageTree : function(button, e) {
-						Sonatype.utils.openWindow("/nexus/service/local/usageGraph/"+this.root.text+".xml");
+						Sonatype.utils
+								.openWindow("/nexus/service/local/usageGraph/"
+										+ this.root.text + ".xml");
 					},
 
 					startSearch : function(p) {
@@ -369,3 +376,38 @@ Ext
 
 				});
 
+Ext.tree.SonatypeMultiLevelTreeLoader = function(config) {
+	Ext.tree.SonatypeMultiLevelTreeLoader.superclass.constructor.call(this, config)
+};
+Ext.extend(Ext.tree.SonatypeMultiLevelTreeLoader, Ext.tree.SonatypeTreeLoader, {
+	processResponse : function(response, node, callback) {
+		var json = response.responseText;
+		try {
+			var o = eval("(" + json + ")");
+			node.beginUpdate();
+			this.addNodes(node, o.data);
+			node.endUpdate();
+			if (typeof callback == "function") {
+				callback(this, node)
+			}
+		} catch (e) {
+			this.handleFailure(response)
+		}
+	},
+	addNodes : function(node, o) {
+		if (this.jsonRoot) {
+			o = o[this.jsonRoot]
+		}
+		for ( var i = 0, len = o.length; i < len; i++) {
+			var n = this.createNode(o[i]);
+			if (n) {
+				node.appendChild(n)
+				if (o[i].data) {
+					this.addNodes(n, o[i].data);
+					n.loading = false;
+					n.loaded = true;
+				}
+			}
+		}
+	}
+});

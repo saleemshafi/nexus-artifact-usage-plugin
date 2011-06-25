@@ -16,10 +16,8 @@ public class ArtifactUsageSerializer {
 		jsonText += "\"version\":\"" + gav.getVersion() + "\",";
 		jsonText += "\"text\":\"" + gav.toString() + "\"";
 		if (depthLimit > 1) {
-			Collection<ArtifactUser> subUsers = artifact.getArtifactUsers();
-			if (!subUsers.isEmpty()) {
-				jsonText += "," + toJson(subUsers, depthLimit - 1);
-			}
+			jsonText += ","
+					+ toJson(artifact.getArtifactUsers(), depthLimit - 1);
 		}
 		jsonText += "}";
 		return jsonText;
