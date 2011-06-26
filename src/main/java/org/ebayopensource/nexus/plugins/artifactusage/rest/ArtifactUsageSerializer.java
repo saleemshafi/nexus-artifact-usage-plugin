@@ -1,6 +1,7 @@
 package org.ebayopensource.nexus.plugins.artifactusage.rest;
 
 import java.util.Collection;
+import java.util.Set;
 
 import org.ebayopensource.nexus.plugins.artifactusage.store.ArtifactUser;
 import org.ebayopensource.nexus.plugins.artifactusage.store.GAV;
@@ -8,13 +9,17 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 public class ArtifactUsageSerializer {
-	public static String toJson(ArtifactUser artifact, int depthLimit) {
-		String jsonText = "{";
-		GAV gav = artifact.getGav();
-		jsonText += "\"groupId\":\"" + gav.getGroupId() + "\",";
+	public static String toJson(GAV gav) {
+		String jsonText = "\"groupId\":\"" + gav.getGroupId() + "\",";
 		jsonText += "\"artifactId\":\"" + gav.getArtifactId() + "\",";
 		jsonText += "\"version\":\"" + gav.getVersion() + "\",";
 		jsonText += "\"text\":\"" + gav.toString() + "\"";
+		return jsonText;
+	}
+
+	public static String toJson(ArtifactUser artifact, int depthLimit) {
+		String jsonText = "{";
+		jsonText += toJson(artifact.getGav());
 		if (depthLimit > 1) {
 			jsonText += ","
 					+ toJson(artifact.getArtifactUsers(), depthLimit - 1);
@@ -32,6 +37,20 @@ public class ArtifactUsageSerializer {
 			}
 			first = false;
 			jsonText += toJson(artifact, depthLimit);
+		}
+		jsonText += "]";
+		return jsonText;
+	}
+
+	public static String toJson(Set<GAV> artifacts) {
+		String jsonText = "\"data\":[";
+		boolean first = true;
+		for (GAV gav : artifacts) {
+			if (!first) {
+				jsonText += ",";
+			}
+			first = false;
+			jsonText += "{" + toJson(gav) + "}";
 		}
 		jsonText += "]";
 		return jsonText;

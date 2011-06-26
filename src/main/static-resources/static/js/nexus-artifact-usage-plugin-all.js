@@ -1,38 +1,47 @@
-Sonatype.Events.addListener('fileContainerInit', function(items) {
-	items.push(new Sonatype.repoServer.ArtifactUsagePanel({
-		name : 'artifactUsagePanel',
+var createArtifactUsagePanels = function(items) {
+	var treePanel = new Sonatype.repoServer.ArtifactUsageTreePanel({
+		name : 'artifactUsageTreePanel',
 		tabTitle : 'Artifact Usage',
 		preferredIndex : 30
-	}));
-});
-Sonatype.Events.addListener('fileContainerUpdate', function(artifactContainer,
-		data) {
-	var panel = artifactContainer.find('name', 'artifactUsagePanel')[0];
-	if (data == null || !data.leaf) {
-		// panel.showArtifactUsageData(null, artifactContainer);
-	} else {
-		panel.showArtifactUsageData(data, artifactContainer);
-	}
-});
+	});
+	var listPanel = new Sonatype.repoServer.ArtifactUsageListPanel({
+		name : 'artifactUsageListPanel',
+		tabTitle : 'Artifact Usage',
+		preferredIndex : 31
+	});
+	
+	treePanel.setTogglePartner(listPanel);
+	items.push(treePanel);
+	items.push(listPanel);
+};
 
-Sonatype.Events.addListener('artifactContainerInit', function(items) {
-	items.push(new Sonatype.repoServer.ArtifactUsagePanel({
-		name : 'artifactUsagePanel',
-		tabTitle : 'Artifact Usage',
-		preferredIndex : 30
-	}));
-});
-Sonatype.Events.addListener('artifactContainerUpdate', function(
-		artifactContainer, payload) {
-	var panel = artifactContainer.find('name', 'artifactUsagePanel')[0];
+var renderArtifactUsagePanels = function(artifactContainer, payload) {
+	var listPanel = artifactContainer.find('name', 'artifactUsageListPanel')[0];
+	var treePanel = artifactContainer.find('name', 'artifactUsageTreePanel')[0];
 	if (payload == null || !payload.leaf) {
 		// panel.showArtifactUsageData(null, artifactContainer);
 	} else {
-		panel.showArtifactUsageData(payload, artifactContainer);
+		treePanel.toggleContainer = listPanel.toggleContainer = artifactContainer;
+		treePanel.loadData(payload, artifactContainer);
+		listPanel.loadData(payload, artifactContainer);
+		if (treePanel.toggleOn) {
+			artifactContainer.hideTab(listPanel);
+			artifactContainer.showTab(treePanel);
+		}
+		if (listPanel.toggleOn) {
+			artifactContainer.hideTab(treePanel);
+			artifactContainer.showTab(listPanel);
+		}
 	}
-});
+}
 
-Sonatype.repoServer.ArtifactUsagePanel = function(config) {
+Sonatype.Events.addListener('fileContainerInit', createArtifactUsagePanels);
+Sonatype.Events.addListener('artifactContainerInit', createArtifactUsagePanels);
+
+Sonatype.Events.addListener('fileContainerUpdate', renderArtifactUsagePanels);
+Sonatype.Events.addListener('artifactContainerUpdate', renderArtifactUsagePanels);
+
+Sonatype.repoServer.ArtifactUsageTreePanel = function(config) {
 	var config = config || {};
 	var defaultConfig = {};
 	Ext.apply(this, config, defaultConfig);
@@ -40,7 +49,7 @@ Sonatype.repoServer.ArtifactUsagePanel = function(config) {
 	this.oldSearchText = '';
 	this.searchTask = new Ext.util.DelayedTask(this.startSearch, this, [ this ]);
 
-	Sonatype.repoServer.ArtifactUsagePanel.superclass.constructor.call(this, {
+	Sonatype.repoServer.ArtifactUsageTreePanel.superclass.constructor.call(this, {
 		title : 'Artifact Usage',
 		anchor : '0 -2',
 		bodyStyle : 'background-color:#FFFFFF',
@@ -58,6 +67,13 @@ Sonatype.repoServer.ArtifactUsagePanel = function(config) {
 					cls : 'x-btn-text-icon',
 					scope : this,
 					handler : this.refreshHandler
+				},
+				' ',
+				{
+					text : 'View as List',
+					cls : 'x-btn-text',
+					scope : this,
+					handler : this.toggleView
 				},
 				' ',
 				{
@@ -134,36 +150,40 @@ Sonatype.repoServer.ArtifactUsagePanel = function(config) {
 
 Ext
 		.extend(
-				Sonatype.repoServer.ArtifactUsagePanel,
+				Sonatype.repoServer.ArtifactUsageTreePanel,
 				Ext.tree.TreePanel,
 				{
-					showArtifactUsageData : function(payload, artifactContainer) {
-						Ext.Ajax
-								.request({
-									url : payload.resourceURI
-											+ '?describe=maven2&isLocal=true',
-									callback : function(options, isSuccess,
-											response) {
-										if (isSuccess) {
-											var infoResp = Ext
-													.decode(response.responseText);
-											this
-													.showArtifactUsers(infoResp.data);
+					loadData : function(payload, artifactContainer) {
+						var resourceURI = payload.resourceURI;
+						if (resourceURI != this.resourceURI) {
+							this.resourceURI = resourceURI;
+							Ext.Ajax
+							.request({
+								url : resourceURI
+										+ '?describe=maven2&isLocal=true',
+								callback : function(options, isSuccess,
+										response) {
+									if (isSuccess) {
+										var infoResp = Ext
+												.decode(response.responseText);
+										this
+												.showArtifactUsers(infoResp.data);
+									} else {
+										if (response.status = 404) {
+											artifactContainer.hideTab(this);
 										} else {
-											if (response.status = 404) {
-												artifactContainer.hideTab(this);
-											} else {
-												Sonatype.utils
-														.connectionError(
-																response,
-																'Unable to retrieve Maven information.');
-											}
+											Sonatype.utils
+												.connectionError(
+														response,
+														'Unable to retrieve Maven information.');
 										}
-									},
-									scope : this,
-									method : 'GET',
-									suppressStatus : '404'
-								});
+									}
+								},
+								scope : this,
+								method : 'GET',
+								suppressStatus : '404'
+							});
+						}
 					},
 
 					showArtifactUsers : function(rootArtifact) {
@@ -174,13 +194,13 @@ Ext
 						this.root.setText(gav);
 						this.root.attributes.localStorageUpdated = false;
 						this.root.attributes.expanded = false;
-						this.root.id = "/nexus/service/local/usage/"
+						this.root.id = Sonatype.config.servicePath+"/usage/"
 								+ this.root.text;
 						this.root.reload();
 					},
 
 					indexBrowserExpandFollowup : function(node) {
-						var urlBase = "/nexus/service/local/usage/";
+						var urlBase = Sonatype.config.servicePath+"/usage/";
 						for ( var j = 0; j < node.childNodes.length; j++) {
 							var childNode = node.childNodes[j];
 							childNode.id = urlBase + childNode.text;
@@ -377,37 +397,158 @@ Ext
 				});
 
 Ext.tree.SonatypeMultiLevelTreeLoader = function(config) {
-	Ext.tree.SonatypeMultiLevelTreeLoader.superclass.constructor.call(this, config)
+	Ext.tree.SonatypeMultiLevelTreeLoader.superclass.constructor.call(this,
+			config)
 };
-Ext.extend(Ext.tree.SonatypeMultiLevelTreeLoader, Ext.tree.SonatypeTreeLoader, {
-	processResponse : function(response, node, callback) {
-		var json = response.responseText;
-		try {
-			var o = eval("(" + json + ")");
-			node.beginUpdate();
-			this.addNodes(node, o.data);
-			node.endUpdate();
-			if (typeof callback == "function") {
-				callback(this, node)
-			}
-		} catch (e) {
-			this.handleFailure(response)
-		}
-	},
-	addNodes : function(node, o) {
-		if (this.jsonRoot) {
-			o = o[this.jsonRoot]
-		}
-		for ( var i = 0, len = o.length; i < len; i++) {
-			var n = this.createNode(o[i]);
-			if (n) {
-				node.appendChild(n)
-				if (o[i].data) {
-					this.addNodes(n, o[i].data);
-					n.loading = false;
-					n.loaded = true;
+Ext.extend(Ext.tree.SonatypeMultiLevelTreeLoader, Ext.tree.SonatypeTreeLoader,
+		{
+			processResponse : function(response, node, callback) {
+				var json = response.responseText;
+				try {
+					var o = eval("(" + json + ")");
+					node.beginUpdate();
+					this.addNodes(node, o.data);
+					node.endUpdate();
+					if (typeof callback == "function") {
+						callback(this, node)
+					}
+				} catch (e) {
+					this.handleFailure(response)
+				}
+			},
+			addNodes : function(node, o) {
+				if (this.jsonRoot) {
+					o = o[this.jsonRoot]
+				}
+				for ( var i = 0, len = o.length; i < len; i++) {
+					var n = this.createNode(o[i]);
+					if (n) {
+						node.appendChild(n)
+						if (o[i].data) {
+							this.addNodes(n, o[i].data);
+							n.loading = false;
+							n.loaded = true;
+						}
+					}
 				}
 			}
+		});
+
+Sonatype.repoServer.ArtifactUsageListPanel = function(config) {
+	var config = config || {};
+	var defaultConfig = {
+		title : "Artifact Usage"
+	};
+	Ext.apply(this, config, defaultConfig);
+	
+	Sonatype.repoServer.ArtifactUsageListPanel.superclass.constructor.call(this, {
+		dataAutoLoad : false,
+		dataId : "id",
+		dataBookmark : "id",
+		dataSortInfo : {
+			field : "groupId",
+			direction : "asc"
+		},
+		columns : [ {
+			name : "groupId",
+			header : "Group ID",
+			width : 200
+		}, {
+			name : "id"
+		}, {
+			name : "artifactId",
+			header : "Artifact ID",
+			width : 250,
+		}, {
+			name : "version",
+			header : "Version",
+			width : 175
+		} ],
+		tbar : [
+				{
+					text : 'View as Tree',
+					cls : 'x-btn-text',
+					scope : this,
+					handler : this.toggleView
+				},
+				' '
+				]
+	});
+}
+
+Ext.extend(Sonatype.repoServer.ArtifactUsageListPanel, Sonatype.panels.GridViewer, {
+	loadData : function(payload, artifactContainer) {
+		resourceURI = payload.resourceURI;
+		if (resourceURI != this.resourceURI) {
+			this.resourceURI = resourceURI;
+			Ext.Ajax
+					.request({
+						url : resourceURI
+								+ '?describe=maven2&isLocal=true',
+						callback : function(options, isSuccess,
+								response) {
+							if (isSuccess) {
+								var infoResp = Ext
+										.decode(response.responseText);
+								this
+										.showArtifactUsers(infoResp.data);
+							} else {
+								if (response.status = 404) {
+									artifactContainer.hideTab(this);
+								} else {
+									Sonatype.utils
+										.connectionError(
+												response,
+												'Unable to retrieve Maven information.');
+								}
+							}
+						},
+						scope : this,
+						method : 'GET',
+						suppressStatus : '404'
+					});
 		}
-	}
+	},
+
+	showArtifactUsers : function(rootArtifact) {
+		this.rootArtifact = rootArtifact;
+		var gav = rootArtifact.groupId + ":"
+				+ rootArtifact.artifactId + ":"
+				+ rootArtifact.baseVersion;
+
+		this.url = Sonatype.config.servicePath+"/usageList/"+gav,
+		this.dataStore.url = this.url;
+		this.dataStore.proxy = new Ext.data.HttpProxy({
+			url : this.url
+		});
+		this.dataAutoLoad = true;
+
+		this.dataStore.on("load", this.dataStoreLoadHandler, this);
+		this.dataStore.load()
+	},
+
 });
+
+Sonatype.repoServer.ViewToggle =  {
+		toggleOn : false,
+		toggler : null,
+		toggleContainer : null,
+		toggleView : function() {
+			if (this.toggler && this.toggleContainer && this.toggleOn) {
+				this.toggleContainer.hideTab(this);
+				this.toggleOn = false;
+				this.toggleContainer.showTab(this.toggler);
+				this.toggler.show();
+				this.toggler.toggleOn = true;
+			}
+		},
+		
+		setTogglePartner : function(toggler) {
+			this.toggler = toggler;
+			toggler.toggler = this;
+			this.toggleOn = true;  // need to do this so the toggleView works
+		}					
+};
+
+Ext.applyIf(Sonatype.repoServer.ArtifactUsageTreePanel.prototype, Sonatype.repoServer.ViewToggle);
+Ext.applyIf(Sonatype.repoServer.ArtifactUsageListPanel.prototype, Sonatype.repoServer.ViewToggle);

@@ -1,6 +1,6 @@
 package org.ebayopensource.nexus.plugins.artifactusage.store;
 
-public class GAV {
+public class GAV implements Comparable {
 	private final String groupId;
 	private final String artifactId;
 	private final String version;
@@ -78,4 +78,22 @@ public class GAV {
 			return false;
 		return true;
 	}
+
+	public int compareTo(Object that) {
+		if (that == null) {
+			return -1;
+		}
+		if (that instanceof GAV) {
+			GAV thatGav = (GAV) that;
+			int soFar = this.groupId.compareTo(thatGav.groupId);
+			if (soFar != 0)
+				return soFar;
+			soFar = this.artifactId.compareTo(thatGav.artifactId);
+			if (soFar != 0)
+				return soFar;
+			return this.version.compareTo(thatGav.version);
+		}
+		return -1;
+	}
+
 }
