@@ -3,10 +3,10 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-
+  
 	<groupId>org.ebayopensource.nexus.plugins</groupId>
 	<artifactId>artifact-usage-plugin</artifactId>
-	<version>0.8</version>
+	<version>0.9.0-SNAPSHOT</version>
     <packaging>nexus-plugin</packaging>
 	<name>Ebay : Nexus Artifact Usage Plugin</name>
 	<description>Nexus plugin that provides visibility into how a particular artifact 
@@ -14,10 +14,10 @@
 
 	<properties>
 		<!-- Set the Nexus version here, against which you build the plugin -->
-		<nexus-version>1.9.1</nexus-version>
-	    <aetherVersion>1.8.1</aetherVersion>
-	    <mavenVersion>3.0.1</mavenVersion>
-	    <wagonVersion>1.0-beta-7</wagonVersion>
+		<nexus-version>2.0.5</nexus-version>
+	    <aetherVersion>1.13.1</aetherVersion>
+	    <mavenVersion>3.0.4</mavenVersion>
+	    <wagonVersion>1.0-beta-6</wagonVersion>
 	    <nexusPluginRepo>/etc/nexus-oss-webapp-1.9.1.1-bundle/nexus-oss-webapp-1.9.1.1/runtime/apps/nexus/plugin-repository</nexusPluginRepo>
 	</properties>
 
@@ -35,6 +35,20 @@
 		<dependency>
 			<groupId>org.sonatype.nexus</groupId>
 			<artifactId>nexus-plugin-api</artifactId>
+			<version>${nexus-version}</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.sonatype.nexus</groupId>
+			<artifactId>nexus-configuration</artifactId>
+			<version>${nexus-version}</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<dependency>
+			<groupId>org.sonatype.nexus</groupId>
+			<artifactId>nexus-proxy</artifactId>		
 			<version>${nexus-version}</version>
 			<scope>provided</scope>
 		</dependency>
@@ -176,6 +190,15 @@
 						<version>1.0</version>
 					</dependency>
 				</dependencies>
+			</plugin>
+			<plugin>
+			  <groupId>org.sonatype.plugins</groupId>
+			  <artifactId>yuicompressor-maven-plugin</artifactId>
+			  <version>0.0.2</version>
+			  <configuration>
+			    <sourceDirectory>${project.build.directory}/classes/static/js/</sourceDirectory>
+			    <output>${project.build.directory}/classes/static/js/nexus-artifact-usage-plugin-all.js</output>
+			  </configuration>
 			</plugin>
 
 			<!-- Have to set source level to Java5, we use annotations -->

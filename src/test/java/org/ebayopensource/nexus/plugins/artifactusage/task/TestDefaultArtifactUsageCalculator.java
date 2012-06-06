@@ -6,11 +6,11 @@ import java.io.InputStream;
 
 import org.ebayopensource.nexus.plugins.artifactusage.store.GAV;
 import org.mockito.Mockito;
-import org.sonatype.nexus.AbstractNexusTestCase;
 import org.sonatype.nexus.proxy.item.RepositoryItemUid;
 import org.sonatype.nexus.proxy.item.StorageFileItem;
+import org.sonatype.nexus.test.NexusTestSupport;
 
-public class TestDefaultArtifactUsageCalculator extends AbstractNexusTestCase {
+public class TestDefaultArtifactUsageCalculator extends NexusTestSupport {
 	public void testCalculateArtifactUsageForRepository() throws Exception {
 		DefaultArtifactUsageCalculator calculator = getCalculator();
 		// calculator.calculateArtifactUsage(repository);
