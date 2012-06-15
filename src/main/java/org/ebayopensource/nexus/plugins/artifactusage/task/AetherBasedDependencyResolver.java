@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.apache.maven.repository.internal.DefaultServiceLocator;
 import org.apache.maven.repository.internal.MavenRepositorySystemSession;
+import org.apache.maven.repository.internal.MavenServiceLocator;
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.logging.AbstractLogEnabled;
@@ -113,7 +113,7 @@ public class AetherBasedDependencyResolver extends AbstractLogEnabled implements
 	// i'm not sure we really need to synchronize this
 	private RepositorySystem getRepositorySystem() {
 		if (this.repoSystem == null) {
-			DefaultServiceLocator locator = new DefaultServiceLocator();
+			MavenServiceLocator locator = new MavenServiceLocator();
 			locator.addService(RepositoryConnectorFactory.class,
 					FileRepositoryConnectorFactory.class);
 			this.repoSystem = locator.getService(RepositorySystem.class);

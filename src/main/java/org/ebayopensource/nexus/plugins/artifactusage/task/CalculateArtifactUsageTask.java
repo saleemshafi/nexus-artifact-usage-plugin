@@ -35,7 +35,7 @@ public class CalculateArtifactUsageTask extends
 	protected ArtifactUsageCalculationResult doRun() throws Exception {
 		ArtifactUsageCalculationResult result = new ArtifactUsageCalculationResult();
 		ArtifactUsageCalculationRequest request = new ArtifactUsageCalculationRequest(
-				getRepositoryId(), getRepositoryGroupId());
+				getRepositoryId(), getRepositoryId());
 		this.calculator.calculateArtifactUsage(request);
 		return result;
 	}
@@ -57,9 +57,9 @@ public class CalculateArtifactUsageTask extends
 
 	@Override
 	protected String getMessage() {
-		if (getRepositoryGroupId() != null) {
+		if (getRepositoryId() != null) {
 			return "Calculating artifact usage for repository group "
-					+ getRepositoryGroupName();
+					+ getRepositoryName();
 		} else if (getRepositoryId() != null) {
 			return "Calculating artifact usage for repository "
 					+ getRepositoryName();

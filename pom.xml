@@ -6,7 +6,7 @@
   
 	<groupId>org.ebayopensource.nexus.plugins</groupId>
 	<artifactId>artifact-usage-plugin</artifactId>
-	<version>0.9.0-SNAPSHOT</version>
+	<version>0.9.0</version>
     <packaging>nexus-plugin</packaging>
 	<name>Ebay : Nexus Artifact Usage Plugin</name>
 	<description>Nexus plugin that provides visibility into how a particular artifact 
@@ -18,7 +18,7 @@
 	    <aetherVersion>1.13.1</aetherVersion>
 	    <mavenVersion>3.0.4</mavenVersion>
 	    <wagonVersion>1.0-beta-6</wagonVersion>
-	    <nexusPluginRepo>/etc/nexus-oss-webapp-1.9.1.1-bundle/nexus-oss-webapp-1.9.1.1/runtime/apps/nexus/plugin-repository</nexusPluginRepo>
+	    <nexusPluginRepo>/dev/nexus-2.0.5/nexus/WEB-INF/plugin-repository</nexusPluginRepo>
 	</properties>
 
 	<dependencies>
@@ -35,21 +35,18 @@
 		<dependency>
 			<groupId>org.sonatype.nexus</groupId>
 			<artifactId>nexus-plugin-api</artifactId>
-			<version>${nexus-version}</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.sonatype.nexus</groupId>
 			<artifactId>nexus-configuration</artifactId>
-			<version>${nexus-version}</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.sonatype.nexus</groupId>
 			<artifactId>nexus-proxy</artifactId>		
-			<version>${nexus-version}</version>
 			<scope>provided</scope>
 		</dependency>
 
@@ -57,7 +54,6 @@
 		<dependency>
 			<groupId>org.sonatype.nexus</groupId>
 			<artifactId>nexus-rest-api</artifactId>
-			<version>${nexus-version}</version>
 			<scope>provided</scope>
 		</dependency>
 		
@@ -310,4 +306,31 @@
 			</plugins>
 		</pluginManagement>
 	</build>
+	<repositories>
+		<repository>
+			<id>sonatype-forge</id>
+			<name>Sonatype Repo</name>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<url>http://repository.sonatype.org/content/groups/forge</url>
+		</repository>
+	</repositories>
+	<pluginRepositories>
+		<pluginRepository>
+			<!-- These guys seem to have atinject -->
+			<id>nuxeo</id>
+			<name>Nuxeo</name>
+			<releases>
+				<enabled>true</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<url>https://maven.nuxeo.org/nexus/content/groups/public</url>
+		</pluginRepository>
+	</pluginRepositories>
 </project>

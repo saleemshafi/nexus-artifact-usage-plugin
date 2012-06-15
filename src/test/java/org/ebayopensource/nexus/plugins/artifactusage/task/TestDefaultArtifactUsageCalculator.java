@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import org.ebayopensource.nexus.plugins.artifactusage.store.GAV;
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.junit.Assert;
 import org.mockito.Mockito;
 import org.sonatype.nexus.proxy.item.RepositoryItemUid;
 import org.sonatype.nexus.proxy.item.StorageFileItem;
@@ -12,12 +15,12 @@ import org.sonatype.nexus.test.NexusTestSupport;
 
 public class TestDefaultArtifactUsageCalculator extends NexusTestSupport {
 	public void testCalculateArtifactUsageForRepository() throws Exception {
-		DefaultArtifactUsageCalculator calculator = getCalculator();
+		// DefaultArtifactUsageCalculator calculator = getCalculator();
 		// calculator.calculateArtifactUsage(repository);
 	}
 
 	public void testCalculateArtifactUsageOfArtifact() throws Exception {
-		DefaultArtifactUsageCalculator calculator = getCalculator();
+		// DefaultArtifactUsageCalculator calculator = getCalculator();
 		// calculator.calculateArtifactUsage(item);
 	}
 
@@ -77,4 +80,13 @@ public class TestDefaultArtifactUsageCalculator extends NexusTestSupport {
 		return pomFileItem;
 	}
 
+    protected void assertEquals( Object expected, Object actual )
+    {
+        MatcherAssert.assertThat( actual, Matchers.equalTo( expected ) );
+    }
+
+    protected void assertNotNull( Object obj )
+    {
+        Assert.assertNotNull( obj );
+    }
 }
