@@ -190,14 +190,20 @@ public class DefaultArtifactUsageCalculator extends AbstractLogEnabled
 					&& !item.getRepositoryItemUid().getPath().endsWith(".pom")) {
 				return;
 			}
-			Gav gav = this.gavCalculator.pathToGav(item.getPath());
-
-			// make sure we've really got a POM file
-			if (gav != null && !gav.isHash() && !gav.isSignature()
-					&& gav.getExtension().equals("pom")) {
-				// and then calculate the artifact usage
-				calculateArtifactUsage((StorageFileItem) item);
+			try {
+				Gav gav = this.gavCalculator.pathToGav(item.getPath());
+	
+				// make sure we've really got a POM file
+				if (gav != null && !gav.isHash() && !gav.isSignature()
+						&& gav.getExtension().equals("pom")) {
+					// and then calculate the artifact usage
+					calculateArtifactUsage((StorageFileItem) item);
+				}
 			}
+			catch (Exception e) {
+				getLogger().error(
+					"Error processing POM file for artifact usage data: " + item.getPath(), e);
+			} 
 		}
 	}
 }
