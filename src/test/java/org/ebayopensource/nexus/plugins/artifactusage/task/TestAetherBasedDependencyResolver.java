@@ -43,7 +43,7 @@ public class TestAetherBasedDependencyResolver extends TestCase {
 		resolver.setTempDirectory(new File("./target/test-repo/"));
 
 		Logger logger = Mockito.mock(Logger.class);
-		resolver.setupLogger(logger);
+		//resolver.setupLogger(logger);
 		return resolver;
 	}
 }

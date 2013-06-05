@@ -22,11 +22,12 @@ import org.sonatype.aether.resolution.ArtifactDescriptorResult;
 import org.sonatype.aether.spi.connector.RepositoryConnectorFactory;
 import org.sonatype.aether.util.artifact.DefaultArtifact;
 import org.sonatype.nexus.configuration.application.NexusConfiguration;
+import org.sonatype.nexus.logging.AbstractLoggingComponent;
 import org.sonatype.nexus.proxy.registry.RepositoryRegistry;
 import org.sonatype.nexus.proxy.repository.Repository;
 
 @Component(role = DependencyResolver.class, hint = "AetherBased")
-public class AetherBasedDependencyResolver extends AbstractLogEnabled implements
+public class AetherBasedDependencyResolver extends AbstractLoggingComponent implements
 		DependencyResolver {
 
 	@Requirement
@@ -86,9 +87,9 @@ public class AetherBasedDependencyResolver extends AbstractLogEnabled implements
 		this.repositoryRegistry = registry;
 	}
 
-	void setupLogger(Logger logger) {
-		this.setupLogger(this, logger);
-	}
+//	void setupLogger(Logger logger) {
+//		this.setupLogger(this, logger);
+//	}
 
 	private File getTempDirectory() {
 		if (this.tempDirectory == null) {
