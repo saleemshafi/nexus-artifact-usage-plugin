@@ -17,6 +17,6 @@ Don't worry though, you can automate the artifact usage indexing through a sched
 
 
 ## Thanks to :
-The initial contributor [Saleem Shafi from ebay](https://github.com/saleemshafi/)
-[Jason](https://github.com/jvoegele) for making me aware of this great plugin
-[Sonatype Nexus team](https://github.com/sonatype/nexus-oss) for their time helping me out on their [chat](https://www.hipchat.com/gW26B2y2Z) !
+- The initial contributor [Saleem Shafi from ebay](https://github.com/saleemshafi/)
+- [Jason](https://github.com/jvoegele) for making me aware of this great plugin
+- [Sonatype Nexus team](https://github.com/sonatype/nexus-oss) for their time helping me out on their [chat](https://www.hipchat.com/gW26B2y2Z) !
