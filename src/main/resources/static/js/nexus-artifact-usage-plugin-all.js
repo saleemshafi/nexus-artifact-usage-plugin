@@ -130,6 +130,10 @@ Sonatype.repoServer.ArtifactUsageTreePanel = function(config) {
 			// remove existing right-click menu
 			// contextMenu: this.nodeContextMenuHandler,
 			expandnode : this.indexBrowserExpandFollowup,
+      dblclick: {
+        fn: this.search,
+        scope: this
+      },
 			scope : this
 		}
 	});
@@ -392,7 +396,14 @@ Ext
 							}
 							node.setText(node.text + ' (Access Denied)');
 						}
-					}
+					},
+
+          search: function (node, event) {
+            var groupId = node.attributes.groupId;
+            var artifactId = node.attributes.artifactId;
+            var version = node.attributes.version;
+            window.location = "index.html#nexus-search;gav~" + groupId + "~" + artifactId + "~" + version + "~~~";
+          }
 
 				});
 
