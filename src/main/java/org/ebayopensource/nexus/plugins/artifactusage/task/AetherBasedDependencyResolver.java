@@ -47,16 +47,8 @@ public class AetherBasedDependencyResolver extends AbstractLoggingComponent impl
 							this.getRepositorySession(), descriptorRequest);
 			for (org.sonatype.aether.graph.Dependency dependency : descriptorResult
 					.getDependencies()) {
-				if (getLogger().isDebugEnabled()) {
-					getLogger().debug(
-							artifact.getArtifactId() + " depends on "
-									+ dependency.getArtifact().getGroupId()
-									+ ":"
-									+ dependency.getArtifact().getArtifactId()
-									+ ":"
-									+ dependency.getArtifact().getVersion());
-				}
-				artifactDependencies.add(new GAV(dependency.getArtifact()
+        getLogger().debug("{} depends on {}", artifact, dependency.getArtifact());
+        artifactDependencies.add(new GAV(dependency.getArtifact()
 						.getGroupId(),
 						dependency.getArtifact().getArtifactId(), dependency
 								.getArtifact().getVersion()));
