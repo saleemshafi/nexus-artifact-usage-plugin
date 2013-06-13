@@ -434,6 +434,7 @@ Ext.extend(Ext.tree.SonatypeMultiLevelTreeLoader, Ext.tree.SonatypeTreeLoader,
 				for ( var i = 0, len = o.length; i < len; i++) {
 					var n = this.createNode(o[i]);
 					if (n) {
+            n.setIcon("icons/repoServer/jar-jar.png");
 						node.appendChild(n)
 						if (o[i].data) {
 							this.addNodes(n, o[i].data);
