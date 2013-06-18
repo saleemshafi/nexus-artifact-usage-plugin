@@ -130,6 +130,10 @@ Sonatype.repoServer.ArtifactUsageTreePanel = function(config) {
 			// remove existing right-click menu
 			// contextMenu: this.nodeContextMenuHandler,
 			expandnode : this.indexBrowserExpandFollowup,
+      dblclick: {
+        fn: this.search,
+        scope: this
+      },
 			scope : this
 		}
 	});
@@ -392,7 +396,14 @@ Ext
 							}
 							node.setText(node.text + ' (Access Denied)');
 						}
-					}
+					},
+
+          search: function (node, event) {
+            var groupId = node.attributes.groupId;
+            var artifactId = node.attributes.artifactId;
+            var version = node.attributes.version;
+            window.location = "index.html#nexus-search;gav~" + groupId + "~" + artifactId + "~" + version + "~~~";
+          }
 
 				});
 
@@ -423,6 +434,7 @@ Ext.extend(Ext.tree.SonatypeMultiLevelTreeLoader, Ext.tree.SonatypeTreeLoader,
 				for ( var i = 0, len = o.length; i < len; i++) {
 					var n = this.createNode(o[i]);
 					if (n) {
+            n.setIcon("icons/repoServer/jar-jar.png");
 						node.appendChild(n)
 						if (o[i].data) {
 							this.addNodes(n, o[i].data);

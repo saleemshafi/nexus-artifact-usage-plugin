@@ -8,6 +8,7 @@ import org.codehaus.plexus.logging.AbstractLogEnabled;
 import org.ebayopensource.nexus.plugins.artifactusage.store.ArtifactUsageStore;
 import org.ebayopensource.nexus.plugins.artifactusage.store.GAV;
 import org.sonatype.nexus.configuration.application.NexusConfiguration;
+import org.sonatype.nexus.logging.AbstractLoggingComponent;
 import org.sonatype.nexus.proxy.NoSuchRepositoryException;
 import org.sonatype.nexus.proxy.ResourceStoreRequest;
 import org.sonatype.nexus.proxy.item.StorageFileItem;
@@ -33,7 +34,7 @@ import org.sonatype.nexus.rest.model.ArtifactCoordinate;
  * @author Saleem Shafi
  */
 @Component(role = ArtifactUsageCalculator.class)
-public class DefaultArtifactUsageCalculator extends AbstractLogEnabled
+public class DefaultArtifactUsageCalculator extends AbstractLoggingComponent
 		implements ArtifactUsageCalculator {
 
 	@Requirement

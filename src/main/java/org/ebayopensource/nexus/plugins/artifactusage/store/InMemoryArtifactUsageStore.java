@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.logging.AbstractLogEnabled;
+import org.sonatype.nexus.logging.AbstractLoggingComponent;
 
 /**
  * An in-memory representation of the artifact usage data. This version would
@@ -15,7 +16,7 @@ import org.codehaus.plexus.logging.AbstractLogEnabled;
  * @author Saleem Shafi
  */
 @Component(role = ArtifactUsageStore.class, hint = "InMemory")
-public class InMemoryArtifactUsageStore extends AbstractLogEnabled implements
+public class InMemoryArtifactUsageStore extends AbstractLoggingComponent implements
 		ArtifactUsageStore {
 
 	private Map<GAV, ArtifactUser> userMap = new ConcurrentHashMap<GAV, ArtifactUser>();
