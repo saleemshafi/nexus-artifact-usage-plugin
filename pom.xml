@@ -1,336 +1,80 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
-	<modelVersion>4.0.0</modelVersion>
-  
-	<groupId>org.ebayopensource.nexus.plugins</groupId>
-	<artifactId>artifact-usage-plugin</artifactId>
-	<version>0.9.0</version>
-    <packaging>nexus-plugin</packaging>
-	<name>Ebay : Nexus Artifact Usage Plugin</name>
-	<description>Nexus plugin that provides visibility into how a particular artifact 
-	in the repository is used by other artifacts in the repository.</description>
+  <modelVersion>4.0.0</modelVersion>
 
-	<properties>
-		<!-- Set the Nexus version here, against which you build the plugin -->
-		<nexus-version>2.0.5</nexus-version>
-	    <aetherVersion>1.13.1</aetherVersion>
-	    <mavenVersion>3.0.4</mavenVersion>
-	    <wagonVersion>1.0-beta-6</wagonVersion>
-	    <nexusPluginRepo>/dev/nexus-2.0.5/nexus/WEB-INF/plugin-repository</nexusPluginRepo>
-	</properties>
+  <groupId>org.ebayopensource.nexus.plugins</groupId>
+  <artifactId>artifact-usage-plugin</artifactId>
+  <version>0.11.0-SNAPSHOT</version>
+  <packaging>nexus-plugin</packaging>
+  <name>Ebay : Nexus Artifact Usage Plugin</name>
+  <description>Nexus plugin that provides visibility into how a particular artifact
+    in the repository is used by other artifacts in the repository.
+  </description>
 
-	<dependencies>
 
-		<!-- Note: there are two sets of dependencies here, the basic (minimal 
-			dependencies needed to build Nexus plugins), and the ITset, that is needed 
-			if you want to write IT tests using real Nexus environment to test your plugins. 
-			If you are using other technique (like having separate module for IT tests), 
-			you can freely remove or just move outside of this module these dependencies. 
-			The ITset of requirements in this POM are put in between "#ITSet BEGINS" 
-			and "#ITSet ENDS" pair of comments. -->
+  <parent>
+    <groupId>org.sonatype.nexus</groupId>
+    <artifactId>nexus-plugin-parent</artifactId>
+    <version>2.5.0-04</version>
+  </parent>
 
-		<!-- Main plugin API, pulling in what is needed -->
-		<dependency>
-			<groupId>org.sonatype.nexus</groupId>
-			<artifactId>nexus-plugin-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
 
-		<dependency>
-			<groupId>org.sonatype.nexus</groupId>
-			<artifactId>nexus-configuration</artifactId>
-			<scope>provided</scope>
-		</dependency>
+  <properties>
+    <!-- Set the Nexus version here, against which you build the plugin -->
+    <nexus-version>2.5.0-04</nexus-version>
+  </properties>
 
-		<dependency>
-			<groupId>org.sonatype.nexus</groupId>
-			<artifactId>nexus-proxy</artifactId>		
-			<scope>provided</scope>
-		</dependency>
 
-		<!-- This dependency is only needed if you want to include REST Resources -->
-		<dependency>
-			<groupId>org.sonatype.nexus</groupId>
-			<artifactId>nexus-rest-api</artifactId>
-			<scope>provided</scope>
-		</dependency>
-		
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-all</artifactId>
-			<version>1.8.5</version>
-			<scope>test</scope>
-		</dependency>
- 
- <!-- Aether Dependencies -->
+  <repositories>
+    <repository>
+      <id>rso-public-grid</id>
+      <url>https://repository.sonatype.org/content/groups/sonatype-public-grid/</url>
+    </repository>
+  </repositories>
+
+  <build>
+    <plugins>
+      <!--
+      Enables the 'nexus-plugin' packaging type, required to build Nexus plugins.
+      -->
+      <plugin>
+        <groupId>org.sonatype.nexus</groupId>
+        <artifactId>nexus-plugin-bundle-maven-plugin</artifactId>
+        <extensions>true</extensions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.plexus</groupId>
+        <artifactId>plexus-component-metadata</artifactId>
+      </plugin>
+    </plugins>
+  </build>
+  <dependencies>
     <dependency>
-      <groupId>org.sonatype.aether</groupId>
-      <artifactId>aether-api</artifactId>
-      <version>${aetherVersion}</version>
+      <groupId>org.sonatype.nexus</groupId>
+      <artifactId>nexus-plugin-api</artifactId>
+      <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.sonatype.aether</groupId>
-      <artifactId>aether-util</artifactId>
-      <version>${aetherVersion}</version>
-      <scope>compile</scope>
+      <groupId>org.sonatype.nexus.plugins</groupId>
+      <artifactId>nexus-restlet1x-plugin</artifactId>
+      <type>${nexus-plugin.type}</type>
+      <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>org.sonatype.aether</groupId>
-      <artifactId>aether-impl</artifactId>
-      <version>${aetherVersion}</version>
+      <groupId>org.sonatype.nexus.plugins</groupId>
+      <artifactId>nexus-maven-bridge-plugin</artifactId>
+      <type>${nexus-plugin.type}</type>
+      <scope>provided</scope>
     </dependency>
+
+    <!-- tests -->
     <dependency>
-      <groupId>org.sonatype.aether</groupId>
-      <artifactId>aether-connector-file</artifactId>
-      <version>${aetherVersion}</version>
+      <groupId>org.sonatype.nexus</groupId>
+      <artifactId>nexus-plugin-test-api</artifactId>
+      <version>${nexus-version}</version>
+      <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.sonatype.aether</groupId>
-      <artifactId>aether-connector-asynchttpclient</artifactId>
-      <version>${aetherVersion}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.sonatype.aether</groupId>
-      <artifactId>aether-connector-wagon</artifactId>
-      <version>${aetherVersion}</version>
-      <exclusions>
-      	<exclusion>
-      		<groupId>org.codehaus.plexus</groupId>
-      		<artifactId>plexus-container-default</artifactId>
-      	</exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven</groupId>
-      <artifactId>maven-aether-provider</artifactId>
-      <version>${mavenVersion}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.maven.wagon</groupId>
-      <artifactId>wagon-ssh</artifactId>
-      <version>${wagonVersion}</version>
-    </dependency>
-    		<!-- Basic testing -->
-		<dependency>
-			<groupId>org.sonatype.nexus</groupId>
-			<artifactId>nexus-plugin-test-api</artifactId>
-			<version>${nexus-version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>4.5</version>
-			<scope>test</scope>
-		</dependency>
-
-		<!-- #ITSet BEGINS -->
-		<!-- Nexus IT setup (dependencies below are needed if you have extensive 
-			ITs and you want to use Nexus Environment) -->
-		<!-- There are plugins connected to this dependency, see below! -->
-		<dependency>
-			<groupId>org.sonatype.nexus</groupId>
-			<artifactId>nexus-test-harness-launcher</artifactId>
-			<scope>test</scope>
-			<version>${nexus-version}</version>
-		</dependency>
-		<!-- #ITSet ENDS -->
-
-	</dependencies>
-
-	<!-- #ITSet BEGINS -->
-	<!-- Nexus IT setup (dependencies below are needed if you have extensive 
-		ITs and you want to use Nexus Environment) -->
-	<!-- There are plugins and dependencies connected to this import, see below 
-		and above! -->
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>org.sonatype.nexus</groupId>
-				<artifactId>nexus-webapp-dependencies</artifactId>
-				<version>${nexus-version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
-	<!-- #ITSet ENDS -->
-
-	<distributionManagement>
-		<repository>
-			<id>private-remote</id>
-			<url>http://localhost:8081/nexus/content/repositories/releases</url>
-		</repository>
-		<snapshotRepository>
-			<id>private-remote-snapshots</id>
-			<url>http://localhost:8081/nexus/content/repositories/snapshots</url>
-			<uniqueVersion>false</uniqueVersion>
-		</snapshotRepository>
-	</distributionManagement>
-	
-	<build>
-		<plugins>
-
-			<!-- Needed for custom packaging -->
-			<plugin>
-				<groupId>org.sonatype.plugins</groupId>
-				<artifactId>app-lifecycle-maven-plugin</artifactId>
-				<version>1.0</version>
-				<extensions>true</extensions>
-				<dependencies>
-					<dependency>
-						<groupId>org.sonatype.plugins</groupId>
-						<artifactId>app-lifecycle-nexus</artifactId>
-						<version>1.0</version>
-					</dependency>
-				</dependencies>
-			</plugin>
-			<plugin>
-			  <groupId>org.sonatype.plugins</groupId>
-			  <artifactId>yuicompressor-maven-plugin</artifactId>
-			  <version>0.0.2</version>
-			  <configuration>
-			    <sourceDirectory>${project.build.directory}/classes/static/js/</sourceDirectory>
-			    <output>${project.build.directory}/classes/static/js/nexus-artifact-usage-plugin-all.js</output>
-			  </configuration>
-			</plugin>
-
-			<!-- Have to set source level to Java5, we use annotations -->
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.0.2</version>
-				<configuration>
-					<source>1.5</source>
-					<target>1.5</target>
-				</configuration>
-			</plugin>
-
-			<!-- #ITSet BEGINS -->
-			<!-- Nexus IT setup (dependencies below are needed if you have extensive 
-				ITs and you want to use Nexus Environment) -->
-			<!-- There are dependencies connected to this set of plugin, see above!
-			<plugin>
-				<groupId>org.sonatype.plugins</groupId>
-				<artifactId>nexus-test-environment-maven-plugin</artifactId>
-				<version>1.3</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>setup-nexus-plugin-environment</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<nexusVersion>${nexus-version}</nexusVersion>
-				</configuration>
-			</plugin>
-
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>failsafe-maven-plugin</artifactId>
-				<version>2.4.3-alpha-1</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>integration-test</goal>
-							<goal>verify</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-			 #ITSet ENDS -->
-
-		      <plugin>
-		        <artifactId>maven-antrun-plugin</artifactId>
-		        <version>1.6</version>
-		        <executions>
-		          <execution>
-		            <phase>install</phase>
-		            <configuration>
-		              <target>
-		                <delete dir="${nexusPluginRepo}/${project.artifactId}-${project.version}" />
-		              	<unzip src="target/${project.artifactId}-${project.version}-bundle.zip"
-		              			dest="${nexusPluginRepo}" />
-		              </target>
-		            </configuration>
-		            <goals>
-		              <goal>run</goal>
-		            </goals>
-		          </execution>
-		        </executions>
-		      </plugin>
-		</plugins>
-		<pluginManagement>
-			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.sonatype.plugins
-										</groupId>
-										<artifactId>
-											app-lifecycle-maven-plugin
-										</artifactId>
-										<versionRange>
-											[1.0,)
-										</versionRange>
-										<goals>
-											<goal>
-												check-dependencies
-											</goal>
-											<goal>
-												generate-metadata
-											</goal>
-											<goal>
-												inject-artifact-handler
-											</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
-	</build>
-	<repositories>
-		<repository>
-			<id>sonatype-forge</id>
-			<name>Sonatype Repo</name>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<url>http://repository.sonatype.org/content/groups/forge</url>
-		</repository>
-	</repositories>
-	<pluginRepositories>
-		<pluginRepository>
-			<!-- These guys seem to have atinject -->
-			<id>nuxeo</id>
-			<name>Nuxeo</name>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-			<url>https://maven.nuxeo.org/nexus/content/groups/public</url>
-		</pluginRepository>
-	</pluginRepositories>
+  </dependencies>
 </project>

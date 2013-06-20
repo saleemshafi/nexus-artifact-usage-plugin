@@ -18,7 +18,7 @@ public class ArtifactUsageIndexHtmlCustomizer extends
 
 	@Override
 	public String getPostHeadContribution(Map<String, Object> ctx) {
-		String version = getVersionFromJarFile("/META-INF/maven/com.paypal.nexus/artifact-usage-plugin/pom.properties");
+		String version = getVersionFromJarFile("/META-INF/maven/org.ebayopensource.nexus.plugins/artifact-usage-plugin/pom.properties");
 
 		return "<script src=\"js/repoServer/nexus-artifact-usage-plugin-all.js"
 				+ (version == null ? "" : "?" + version)

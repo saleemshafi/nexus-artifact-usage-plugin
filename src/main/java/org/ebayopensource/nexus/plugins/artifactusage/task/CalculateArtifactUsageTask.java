@@ -18,7 +18,7 @@ import org.sonatype.scheduling.SchedulerTask;
  * 
  * @author Saleem Shafi
  */
-@Component(role = SchedulerTask.class, hint = ArtifactUsageCalculationTaskDescriptor.ID)
+@Component(role = SchedulerTask.class, hint = ArtifactUsageCalculationTaskDescriptor.ID, instantiationStrategy = "per-lookup")
 public class CalculateArtifactUsageTask extends
 		AbstractNexusRepositoriesTask<ArtifactUsageCalculationResult> implements
 		Initializable {
@@ -67,5 +67,11 @@ public class CalculateArtifactUsageTask extends
 			return "Calculating artifact usage for all registered repositories";
 		}
 	}
+
+  @Override
+  protected String getRepositoryFieldId()
+  {
+    return ArtifactUsageCalculationTaskDescriptor.REPO_OR_GROUP_FIELD_ID;
+  }
 
 }
