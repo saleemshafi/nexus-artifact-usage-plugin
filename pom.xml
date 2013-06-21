@@ -108,8 +108,14 @@
     <repository>
       <id>local-repository</id>
       <name>Local Repository</name>
-      <url>http://localhost:8081/nexus/content/repositories/snapshots</url>
+      <url>http://localhost:8081/nexus/content/repositories/releases</url>
       <layout>default</layout>
     </repository>
+    <snapshotRepository>
+      <id>local-repository-snapshots</id>
+      <name>Local Repository Snapshots</name>
+      <url>http://localhost:8081/nexus/content/repositories/snapshots</url>
+      <layout>default</layout>
+    </snapshotRepository>
   </distributionManagement>
 </project>
