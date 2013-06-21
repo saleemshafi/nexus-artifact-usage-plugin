@@ -13,7 +13,7 @@ body { width: 800px; background: white; border-right: 1px solid black; border-le
 <p>The nexus-artifact-usage-plugin provides visibility into how a particular artifact is used within your Nexus repo.  It tracks what artifacts in your
 repo have dependencies to the artifact in question and allows you to walk that dependency tree in reverse.</p>
 <h2>How to compile the source code</h2>
-<p>Go to the project code page : https://github.com/saleemshafi/nexus-artifact-usage-plugin and follow the instructions</p>
+<p><a href="https://github.com/saleemshafi/nexus-artifact-usage-plugin and follow the instructions">Go to the project code page</a> and follow the instructions</p>
 <h2>Installation</h2>
 <p>Simply download the <a href="http://saleemshafi.github.io/nexus-artifact-usage-plugin/bundles/artifact-usage-plugin-0.11.0-bundle.zip">latest stable 
 release bundle tested with nexus 2.4.0-09</a> and drop it into your "plugin-repository" folder.  The next time you start Nexus, you should notice a new tab when selecting an artifact
@@ -24,6 +24,9 @@ doesn't inherently track this information, so we have to crawl through the repos
 Nexus, you can create a new task of type "Recalculate Artifact Usage" for all of the repositories and just set the recurrence to "Manual".</p>
 <p>Once you do this, the processing should automatically start without you even having to run it.  Keeping this task around will also automatically
 trigger a calculation of the artifact usage whenever you restart Nexus.</p>
+
+<img src="https://raw.github.com/anthonydahanne/nexus-artifact-usage-plugin/master/screenshots/scheduled-task.png"/>
+
 <h2>Usage</h2>
 <p>The plugin also recognizes whenever a new artifact gets into the repository (either because of a cache dependency resolution or getting deployed into
 the repository) or an artifact gets deleted and automatically updates the artifact usage information.  However, if you ever feel like the data might
@@ -33,6 +36,10 @@ artifact you've selected.  You can drill into this to get a full usage tree, or 
 the full tree of artifacts.</p>
 <p>There's also an alternate List View that shows you a list of all of the artifacts that depend on the selected artifact, without the tree structure.
 This allows you to quickly determine whether a particular artifact is in the usage tree without having to know exactly what path to take in the tree.</p>
+
+
+<img src="https://raw.github.com/anthonydahanne/nexus-artifact-usage-plugin/master/screenshots/artifact-usage.png"/>
+
 <h2>What's Next</h2>
 <p>There's plenty more to do to make this even easier to work with, and you can track those new features on the <a 
 href="https://github.com/saleemshafi/nexus-artifact-usage-plugin/issues">GitHub Issues page</a>.
