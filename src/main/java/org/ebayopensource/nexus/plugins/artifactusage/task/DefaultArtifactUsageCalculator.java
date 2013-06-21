@@ -4,9 +4,9 @@ import java.io.IOException;
 
 import org.codehaus.plexus.component.annotations.Component;
 import org.codehaus.plexus.component.annotations.Requirement;
-import org.codehaus.plexus.logging.AbstractLogEnabled;
 import org.ebayopensource.nexus.plugins.artifactusage.store.ArtifactUsageStore;
 import org.ebayopensource.nexus.plugins.artifactusage.store.GAV;
+import org.ebayopensource.nexus.plugins.artifactusage.utils.ExceptionUtils;
 import org.sonatype.nexus.configuration.application.NexusConfiguration;
 import org.sonatype.nexus.logging.AbstractLoggingComponent;
 import org.sonatype.nexus.proxy.NoSuchRepositoryException;
@@ -19,11 +19,7 @@ import org.sonatype.nexus.proxy.maven.gav.GavCalculator;
 import org.sonatype.nexus.proxy.registry.ContentClass;
 import org.sonatype.nexus.proxy.registry.RepositoryRegistry;
 import org.sonatype.nexus.proxy.repository.Repository;
-import org.sonatype.nexus.proxy.walker.AbstractWalkerProcessor;
-import org.sonatype.nexus.proxy.walker.DefaultWalkerContext;
-import org.sonatype.nexus.proxy.walker.DottedStoreWalkerFilter;
-import org.sonatype.nexus.proxy.walker.Walker;
-import org.sonatype.nexus.proxy.walker.WalkerContext;
+import org.sonatype.nexus.proxy.walker.*;
 import org.sonatype.nexus.rest.artifact.PomArtifactManager;
 import org.sonatype.nexus.rest.model.ArtifactCoordinate;
 
@@ -63,25 +59,30 @@ public class DefaultArtifactUsageCalculator extends AbstractLoggingComponent
 		if (request.getRepositoryId() != null) {
 			Repository repository = this.repositoryRegistry
 					.getRepository(request.getRepositoryId());
-
+      if (getLogger().isInfoEnabled()) {
+        getLogger().info("Running ArtifactUsageCalculation only on " + repository.getId());
+      }
 			if (MavenRepository.class.isAssignableFrom(repository.getClass())
-					&& repository.getRepositoryContentClass().isCompatible(
-							contentClass)) {
+					&& repository.getRepositoryContentClass().isCompatible(contentClass)) {
 				result.addResult(calculateArtifactUsage((MavenRepository) repository));
 			} else {
-				throw new IllegalArgumentException("The repository with ID="
-						+ repository.getId() + " is not MavenRepository!");
+        String notAMavenRepository = "The repository with ID=" + repository.getId() + " is not a MavenRepository!";
+        getLogger().error(notAMavenRepository);
+				throw new IllegalArgumentException(notAMavenRepository);
 			}
 		} else {
+      getLogger().info("Running ArtifactUsageCalculation on all repositories");
 			for (Repository repository : this.repositoryRegistry
 					.getRepositories()) {
-				// skip and repository that aren't Maven repositories
-				if (MavenRepository.class.isAssignableFrom(repository
-						.getClass())
-						&& repository.getRepositoryContentClass().isCompatible(
-								contentClass)) {
+				// skip repositories that aren't Maven repositories
+				if (MavenRepository.class.isAssignableFrom(repository.getClass())
+						&& repository.getRepositoryContentClass().isCompatible(contentClass)) {
 					result.addResult(calculateArtifactUsage((MavenRepository) repository));
-				}
+				} else {
+          if (getLogger().isInfoEnabled()) {
+            getLogger().info(repository.getId() + " was skipped because it is not a maven repositories");
+          }
+        }
 			}
 		}
 
@@ -96,6 +97,9 @@ public class DefaultArtifactUsageCalculator extends AbstractLoggingComponent
 	 */
 	protected ArtifactUsageCalculationRepositoryResult calculateArtifactUsage(
 			MavenRepository repository) {
+    if (getLogger().isInfoEnabled()) {
+      getLogger().info("Beginning calculating artifact usage on " + repository.getId());
+    }
 		ArtifactUsageCalculationRepositoryResult result = new ArtifactUsageCalculationRepositoryResult(
 				repository.getId());
 
@@ -106,12 +110,20 @@ public class DefaultArtifactUsageCalculator extends AbstractLoggingComponent
 				new ArtifactUsageCalculationWalkerProcessor(repository
 						.getGavCalculator()));
 
-		walker.walk(ctxMain);
+    try {
+		  walker.walk(ctxMain);
+    } catch (WalkerException we) {
+      // the fact that walking through one repo ended badly does not mean we want to stop the whole analysis !
+      getLogger().error("The artifact usage calculation did not end up successfully for this repository : "
+              + repository.getId(), we);
+    }
 
 		if (ctxMain.getStopCause() != null) {
 			result.setSuccessful(false);
 		}
-
+    if (getLogger().isInfoEnabled()) {
+      getLogger().info("Ending calculating artifact usage on " + repository.getId());
+    }
 		return result;
 	}
 
@@ -167,8 +179,8 @@ public class DefaultArtifactUsageCalculator extends AbstractLoggingComponent
 			ArtifactCoordinate ac = mgr.getArtifactCoordinateFromTempPomFile();
 			return new GAV(ac.getGroupId(), ac.getArtifactId(), ac.getVersion());
 		} catch (Exception e) {
-			getLogger().error(
-					"Error processing POM file for artifact usage data.", e);
+			getLogger().warn(
+              "Error processing POM file for artifact usage data.", ExceptionUtils.getRootCause(e));
 			return null;
 		}
 
@@ -202,8 +214,8 @@ public class DefaultArtifactUsageCalculator extends AbstractLoggingComponent
 				}
 			}
 			catch (Exception e) {
-				getLogger().error(
-					"Error processing POM file for artifact usage data: " + item.getPath(), e);
+				getLogger().warn(
+                "Error processing POM file for artifact usage data: " + item.getPath(), ExceptionUtils.getRootCause(e));
 			} 
 		}
 	}
