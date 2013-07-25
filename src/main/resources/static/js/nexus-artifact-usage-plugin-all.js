@@ -168,6 +168,7 @@ Ext
 								callback : function(options, isSuccess,
 										response) {
 									if (isSuccess) {
+										artifactContainer.showTab(this);
 										var infoResp = Ext
 												.decode(response.responseText);
 										this
