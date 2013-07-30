@@ -7,6 +7,8 @@ Simply clone this repo and run mvn clean install
 ## How to install :
 Unzip the archive in target named artifact-usage-plugin-0.10.0-SNAPSHOT-bundle.zip to NEXUSHOME/nexus/WEB-INF/plugin-repository and restart nexus.
 
+Or simply download the [latest release](https://github.com/saleemshafi/nexus-artifact-usage-plugin/releases)
+
 ## How to use :
 Simply search for an artifact and select the "Artifact Usage" tab : 
 ![Screenshot](https://raw.github.com/anthonydahanne/nexus-artifact-usage-plugin/master/screenshots/artifact-usage.png "Artifact Usage")
