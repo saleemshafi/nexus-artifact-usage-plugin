@@ -2,8 +2,10 @@ package org.ebayopensource.nexus.plugins.artifactusage.rest;
 
 import java.util.Collection;
 
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
+
 import org.ebayopensource.nexus.plugins.artifactusage.store.ArtifactUsageStore;
 import org.ebayopensource.nexus.plugins.artifactusage.store.ArtifactUser;
 import org.ebayopensource.nexus.plugins.artifactusage.store.GAV;
@@ -16,12 +18,17 @@ import org.restlet.resource.StringRepresentation;
 import org.restlet.resource.Variant;
 import org.sonatype.nexus.rest.AbstractNexusPlexusResource;
 import org.sonatype.plexus.rest.resource.PathProtectionDescriptor;
-import org.sonatype.plexus.rest.resource.PlexusResource;
 
-@Component(role = PlexusResource.class, hint = "org.ebayopensource.nexus.plugins.artifactusage.rest.ArtifactUsageResource")
+@Singleton
+@Named("org.ebayopensource.nexus.plugins.artifactusage.rest.ArtifactUsageResource")
 public class ArtifactUsageResource extends AbstractNexusPlexusResource {
-	@Requirement(hint = "InMemory")
-	private ArtifactUsageStore artifactUsageStore;
+
+	private final ArtifactUsageStore artifactUsageStore;
+
+	@Inject
+	public ArtifactUsageResource(@Named("InMemory") ArtifactUsageStore artifactUsageStore) {
+		this.artifactUsageStore = artifactUsageStore;
+	}
 
 	@Override
 	public String getResourceUri() {

@@ -1,88 +1,83 @@
 package org.ebayopensource.nexus.plugins.artifactusage.event;
 
-import java.io.IOException;
-
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 import org.ebayopensource.nexus.plugins.artifactusage.task.ArtifactUsageCalculator;
+import org.slf4j.Logger;
 import org.sonatype.aether.resolution.ArtifactDescriptorException;
-import org.sonatype.nexus.proxy.events.AbstractEventInspector;
-import org.sonatype.nexus.proxy.events.EventInspector;
+import org.sonatype.nexus.events.EventSubscriber;
 import org.sonatype.nexus.proxy.events.RepositoryItemEventCache;
 import org.sonatype.nexus.proxy.events.RepositoryItemEventDelete;
 import org.sonatype.nexus.proxy.events.RepositoryItemEventStore;
 import org.sonatype.nexus.proxy.item.StorageFileItem;
 import org.sonatype.nexus.proxy.item.StorageItem;
-import org.sonatype.plexus.appevents.Event;
+
+import com.google.common.eventbus.Subscribe;
+
+import java.io.IOException;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 
 /**
  * Event handler that updates the artifact usage data whenever an artifact is
  * added or deleted from the repository.
  * 
  * @author Saleem Shafi
- * 
  */
-@Component(role = EventInspector.class, hint = "ArtifactEventInspector")
-public class ArtifactUsageEventInspector extends AbstractEventInspector {
+@Singleton
+@Named("ArtifactEventInspector")
+public class ArtifactUsageEventInspector implements EventSubscriber {
 
-	@Requirement
-	private ArtifactUsageCalculator calculator;
+	private final Logger logger;
 
-	// Only handle cases where a repository is added, updated or deleted
-	public boolean accepts(Event<?> evt) {
-		return evt instanceof RepositoryItemEventStore
-				|| evt instanceof RepositoryItemEventDelete
-				|| evt instanceof RepositoryItemEventCache;
-	}
+	private final ArtifactUsageCalculator calculator;
 
-	public void inspect(Event<?> evt) {
-		try {
-			// add or update
-			if (evt instanceof RepositoryItemEventStore) {
-				onItemStore((RepositoryItemEventStore) evt);
-				// downloaded and cached
-			} else if (evt instanceof RepositoryItemEventCache) {
-				onItemCache((RepositoryItemEventCache) evt);
-				// delete
-			} else if (evt instanceof RepositoryItemEventDelete) {
-				onItemDelete((RepositoryItemEventDelete) evt);
-			}
-			// just log the errors
-		} catch (IOException e) {
-			getLogger()
-					.error("Error processing artifact usage during event", e);
-		} catch (ArtifactDescriptorException e) {
-			getLogger()
-					.error("Error processing artifact usage during event", e);
-		}
-	}
-
-	private void onItemDelete(RepositoryItemEventDelete evt) throws IOException {
-		// we only care about POM files
-		StorageItem item = evt.getItem();
-		if (item instanceof StorageFileItem && item.getPath().endsWith(".pom")) {
-			calculator.removeArtifactUsage((StorageFileItem) item);
-		}
-	}
-
-	private void onItemCache(RepositoryItemEventCache evt) throws IOException,
-			ArtifactDescriptorException {
-		StorageItem item = evt.getItem();
-		if (item instanceof StorageFileItem && item.getPath().endsWith(".pom")) {
-			calculator.calculateArtifactUsage((StorageFileItem) item);
-		}
-	}
-
-	private void onItemStore(RepositoryItemEventStore evt) throws IOException,
-			ArtifactDescriptorException {
-		// we only care about POM files
-		StorageItem item = evt.getItem();
-		if (item instanceof StorageFileItem && item.getPath().endsWith(".pom")) {
-			calculator.calculateArtifactUsage((StorageFileItem) item);
-		}
-	}
-
-	void setArtifactUsageCalculator(ArtifactUsageCalculator calculator) {
+	@Inject
+	public ArtifactUsageEventInspector(final Logger logger, final ArtifactUsageCalculator calculator) {
+		this.logger = logger;
 		this.calculator = calculator;
 	}
+
+	@Subscribe
+	public void onItemDelete(final RepositoryItemEventDelete evt) {
+		try {
+			// we only care about POM files
+			final StorageItem item = evt.getItem();
+			if (item instanceof StorageFileItem && item.getPath().endsWith(".pom")) {
+				calculator.removeArtifactUsage((StorageFileItem) item);
+			}
+		} catch (final IOException e) {
+			logger.error("Error processing artifact usage during event", e);
+		}
+	}
+
+	@Subscribe
+	public void onItemCache(final RepositoryItemEventCache evt) {
+		try {
+			final StorageItem item = evt.getItem();
+			if (item instanceof StorageFileItem && item.getPath().endsWith(".pom")) {
+				calculator.calculateArtifactUsage((StorageFileItem) item);
+			}
+		} catch (final IOException e) {
+			logger.error("Error processing artifact usage during event", e);
+		} catch (final ArtifactDescriptorException e) {
+			logger.error("Error processing artifact usage during event", e);
+		}
+	}
+
+	@Subscribe
+	public void onItemStore(final RepositoryItemEventStore evt) {
+		try {
+			// we only care about POM files
+			final StorageItem item = evt.getItem();
+			if (item instanceof StorageFileItem && item.getPath().endsWith(".pom")) {
+				calculator.calculateArtifactUsage((StorageFileItem) item);
+			}
+		} catch (final IOException e) {
+			logger.error("Error processing artifact usage during event", e);
+		} catch (final ArtifactDescriptorException e) {
+			logger.error("Error processing artifact usage during event", e);
+		}
+	}
+
 }

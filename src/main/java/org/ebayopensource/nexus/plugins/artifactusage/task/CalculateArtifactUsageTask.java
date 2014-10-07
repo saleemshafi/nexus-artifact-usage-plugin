@@ -1,13 +1,14 @@
 package org.ebayopensource.nexus.plugins.artifactusage.task;
 
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.Initializable;
 import org.codehaus.plexus.personality.plexus.lifecycle.phase.InitializationException;
 import org.ebayopensource.nexus.plugins.artifactusage.task.descriptors.ArtifactUsageCalculationTaskDescriptor;
 import org.sonatype.nexus.scheduling.AbstractNexusRepositoriesTask;
 import org.sonatype.scheduling.Scheduler;
-import org.sonatype.scheduling.SchedulerTask;
+
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 
 /**
  * Scheduled task to build artifact usage data for all artifacts in a particular
@@ -18,18 +19,23 @@ import org.sonatype.scheduling.SchedulerTask;
  * 
  * @author Saleem Shafi
  */
-@Component(role = SchedulerTask.class, hint = ArtifactUsageCalculationTaskDescriptor.ID, instantiationStrategy = "per-lookup")
+@Singleton
+@Named(ArtifactUsageCalculationTaskDescriptor.ID)
 public class CalculateArtifactUsageTask extends
 		AbstractNexusRepositoriesTask<ArtifactUsageCalculationResult> implements
 		Initializable {
 
 	public static final String CALCULATE_ARTIFACT_USAGE_ACTION = "CALCARTIFACTUSAGE";
 
-	@Requirement
-	private ArtifactUsageCalculator calculator;
+	private final ArtifactUsageCalculator calculator;
 
-	@Requirement
-	private Scheduler scheduler;
+	private final Scheduler scheduler;
+
+	@Inject
+	public CalculateArtifactUsageTask(ArtifactUsageCalculator calculator, Scheduler scheduler) {
+		this.calculator = calculator;
+		this.scheduler = scheduler;
+	}
 
 	@Override
 	protected ArtifactUsageCalculationResult doRun() throws Exception {
@@ -68,10 +74,9 @@ public class CalculateArtifactUsageTask extends
 		}
 	}
 
-  @Override
-  protected String getRepositoryFieldId()
-  {
-    return ArtifactUsageCalculationTaskDescriptor.REPO_OR_GROUP_FIELD_ID;
-  }
+	@Override
+	protected String getRepositoryFieldId() {
+		return ArtifactUsageCalculationTaskDescriptor.REPO_OR_GROUP_FIELD_ID;
+	}
 
 }
