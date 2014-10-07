@@ -5,9 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.logging.AbstractLogEnabled;
-import org.sonatype.nexus.logging.AbstractLoggingComponent;
+import javax.inject.Named;
+import javax.inject.Singleton;
 
 /**
  * An in-memory representation of the artifact usage data. This version would
@@ -15,9 +14,9 @@ import org.sonatype.nexus.logging.AbstractLoggingComponent;
  * 
  * @author Saleem Shafi
  */
-@Component(role = ArtifactUsageStore.class, hint = "InMemory")
-public class InMemoryArtifactUsageStore extends AbstractLoggingComponent implements
-		ArtifactUsageStore {
+@Singleton
+@Named("InMemory")
+public class InMemoryArtifactUsageStore implements ArtifactUsageStore {
 
 	private Map<GAV, ArtifactUser> userMap = new ConcurrentHashMap<GAV, ArtifactUser>();
 	// we need this one, too, so that we can clean up old usage data if

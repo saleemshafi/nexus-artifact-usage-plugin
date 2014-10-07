@@ -2,12 +2,13 @@ package org.ebayopensource.nexus.plugins.artifactusage.rest;
 
 import java.util.Collection;
 
+import javax.inject.Inject;
+import javax.inject.Named;
+import javax.inject.Singleton;
 import javax.ws.rs.Produces;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
-import org.codehaus.plexus.component.annotations.Component;
-import org.codehaus.plexus.component.annotations.Requirement;
 import org.ebayopensource.nexus.plugins.artifactusage.store.ArtifactUsageStore;
 import org.ebayopensource.nexus.plugins.artifactusage.store.ArtifactUser;
 import org.ebayopensource.nexus.plugins.artifactusage.store.GAV;
@@ -21,18 +22,23 @@ import org.restlet.resource.StringRepresentation;
 import org.restlet.resource.Variant;
 import org.sonatype.nexus.rest.AbstractNexusPlexusResource;
 import org.sonatype.plexus.rest.resource.PathProtectionDescriptor;
-import org.sonatype.plexus.rest.resource.PlexusResource;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 // TODO: Consider re-implementing this as a view provider and display full usage tree at once (no Ajax tree building)
 @Produces({ "application/xml", "application/json" })
-@Component(role = PlexusResource.class, hint = "org.ebayopensource.nexus.plugins.artifactusage.rest.ArtifactUsageGraphResource")
+@Singleton
+@Named("org.ebayopensource.nexus.plugins.artifactusage.rest.ArtifactUsageGraphResource")
 public class ArtifactUsageGraphResource extends AbstractNexusPlexusResource {
-	@Requirement(hint = "InMemory")
-	private ArtifactUsageStore artifactUsageStore;
 
-	@Override
+	private final ArtifactUsageStore artifactUsageStore;
+
+    @Inject
+    public ArtifactUsageGraphResource(@Named("InMemory") ArtifactUsageStore artifactUsageStore) {
+        this.artifactUsageStore = artifactUsageStore;
+    }
+
+    @Override
 	public String getResourceUri() {
 		return "/usageGraph";
 	}

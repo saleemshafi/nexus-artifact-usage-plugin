@@ -14,15 +14,15 @@
 
 
   <parent>
-    <groupId>org.sonatype.nexus</groupId>
-    <artifactId>nexus-plugin-parent</artifactId>
-    <version>2.4.0-09</version>
+    <groupId>org.sonatype.nexus.plugins</groupId>
+    <artifactId>nexus-plugins</artifactId>
+    <version>2.8.0-05</version>
   </parent>
 
 
   <properties>
     <!-- Set the Nexus version here, against which you build the plugin -->
-    <nexus-version>2.4.0-09</nexus-version>
+    <nexus-version>2.8.0-05</nexus-version>
   </properties>
 
 
@@ -48,9 +48,11 @@
         <artifactId>plexus-component-metadata</artifactId>
       </plugin>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
+        <groupId>org.sonatype.plugins</groupId>
+        <artifactId>yuicompressor-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
         <artifactId>maven-release-plugin</artifactId>
-        <version>2.4.1</version>
         <executions>
           <execution>
             <id>default</id>
@@ -63,7 +65,6 @@
       <plugin>
         <groupId>org.sonatype.plugins</groupId>
         <artifactId>nexus-staging-maven-plugin</artifactId>
-        <version>1.4.2</version>
         <extensions>false</extensions>
       </plugin>
     </plugins>
@@ -86,12 +87,17 @@
       <type>${nexus-plugin.type}</type>
       <scope>provided</scope>
     </dependency>
+    <dependency>
+      <groupId>org.sonatype.nexus.plugins</groupId>
+      <artifactId>nexus-ui-extjs3-plugin</artifactId>
+      <type>${nexus-plugin.type}</type>
+      <scope>provided</scope>
+    </dependency>
 
     <!-- tests -->
     <dependency>
       <groupId>org.sonatype.nexus</groupId>
-      <artifactId>nexus-plugin-test-api</artifactId>
-      <version>${nexus-version}</version>
+      <artifactId>nexus-plugin-testsupport</artifactId>
       <scope>test</scope>
     </dependency>
   </dependencies>
